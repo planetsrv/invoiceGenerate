@@ -1,0 +1,2341 @@
+/* =========================================================
+Design tokens dan fondasi halaman
+========================================================= */
+:root {
+    --ink: #111827;
+    --muted: #64748b;
+    --navy: #0b1220;
+    --navy-soft: #172033;
+    --primary: #5b5bd6;
+    --primary-dark: #4545b8;
+    --gold: #c8a96b;
+    --surface: rgba(255, 255, 255, .94);
+    --line: #e8ecf3;
+    --shadow: 0 18px 45px rgba(15, 23, 42, .08);
+    --scrollbar-track: #e9edf5;
+    --scrollbar-thumb: #8d91d8;
+    --scrollbar-thumb-hover: #5b5bd6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: clamp(14px, calc(13px + .2vw), 16px);
+}
+
+body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 8% 0%, rgba(91, 91, 214, .10), transparent 28rem), radial-gradient(circle at 95% 8%, rgba(200, 169, 107, .11), transparent 24rem), #f5f7fb;
+    color: var(--ink);
+    font-family: 'Poppins', sans-serif;
+    font-size: .9rem;
+}
+
+/* =========================================================
+Navbar dan identitas aplikasi
+========================================================= */
+.app-navbar {
+    background: linear-gradient(120deg, #090f1d 0%, #121c31 68%, #1b2740 100%);
+    border: 0;
+}
+
+.brand-wrap {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+}
+
+.brand-mark {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    color: #17120a;
+    background: linear-gradient(145deg, #ead39f, var(--gold));
+    border-radius: 13px;
+    box-shadow: 0 8px 24px rgba(200,169,107,.28);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    letter-spacing: -.02em;
+    white-space: normal;
+    line-height: 1.1;
+}
+
+.brand-subtitle {
+    display: block;
+    margin-top: .22rem;
+    color: #9ba7bb;
+    font-size: .68rem;
+    font-weight: 400;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.navbar-status {
+    color: #d6deeb;
+    background: transparent;
+    border: 0;
+    padding: .5rem .75rem;
+    border-radius: 999px;
+    font-size: .75rem;
+}
+
+.navbar-status i {
+    color: #65d69e;
+}
+
+.navbar-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .5rem;
+}
+
+.app-navbar .btn {
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.app-navbar .btn-outline-light {
+    color: #f4f7fb;
+    background: transparent;
+}
+
+.app-navbar .btn-outline-light:hover {
+    color: #fff;
+    background: rgba(255,255,255,.1);
+}
+
+.app-navbar .navbar-toggler {
+    padding: .4rem;
+    border: 0;
+    box-shadow: none;
+    color: rgba(255,255,255,.9);
+}
+
+.app-navbar .navbar-toggler:focus {
+    box-shadow: none;
+}
+
+/* =========================================================
+Layout halaman, heading, dan statistik
+========================================================= */
+.app-shell {
+    max-width: 1540px;
+    margin: 0 auto;
+}
+
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+    margin-bottom: .45rem;
+    color: var(--primary);
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.page-title {
+    margin: 0;
+    font-size: clamp(1.55rem, 2vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -.04em;
+}
+
+.page-description {
+    margin: .45rem 0 0;
+    color: var(--muted);
+}
+
+.stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: min(100%, 500px);
+    gap: .65rem;
+}
+
+.mini-stat {
+    min-width: 0;
+    min-height: 68px;
+    padding: .65rem .85rem;
+    background: rgba(255,255,255,.75);
+    border: 1px solid rgba(255,255,255,.9);
+    border-radius: 14px;
+    box-shadow: 0 8px 25px rgba(15,23,42,.05);
+    overflow: hidden;
+}
+
+.mini-stat span {
+    display: block;
+    color: var(--muted);
+    font-size: .66rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.mini-stat strong {
+    display: block;
+    margin-top: .15rem;
+    color: var(--navy);
+    font-size: 1.1rem;
+}
+
+button.mini-stat {
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: all .2s ease;
+}
+
+button.mini-stat:hover {
+    border-color: rgba(91,91,214,.35);
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+button.mini-stat:focus-visible {
+    outline: 3px solid rgba(91,91,214,.18);
+    outline-offset: 2px;
+}
+
+.mini-stat-action strong {
+    color: var(--primary);
+    font-size: .8rem;
+    white-space: nowrap;
+}
+
+/* =========================================================
+Card dan heading setiap bagian
+========================================================= */
+.card, .modal-content {
+    border: 1px solid rgba(226,232,240,.85);
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.premium-card {
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 1.35rem;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    margin-bottom: 1.1rem;
+}
+
+.section-icon {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    color: var(--primary);
+    background: #eeeeff;
+    border-radius: 13px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.section-heading p {
+    margin: .2rem 0 0;
+    color: var(--muted);
+    font-size: .78rem;
+}
+
+/* =========================================================
+Form, pemilih file, dan tombol
+========================================================= */
+.form-label {
+    color: #344054;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    min-height: 45px;
+    border: 1px solid #dfe4ec;
+    border-radius: 12px;
+    background-color: #fbfcfe;
+    font-size: .86rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: rgba(91,91,214,.65);
+    background: #fff;
+    box-shadow: 0 0 0 .22rem rgba(91,91,214,.11);
+}
+
+.form-text {
+    color: #8993a5;
+    font-size: .7rem;
+}
+
+.file-picker {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    height: 45px;
+    overflow: hidden;
+    border: 1px solid #dfe4ec;
+    border-radius: 12px;
+    background: #fbfcfe;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.file-picker:focus-within {
+    border-color: rgba(91,91,214,.65);
+    background: #fff;
+    box-shadow: 0 0 0 .22rem rgba(91,91,214,.11);
+}
+
+.file-picker-button {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0 .85rem;
+    color: #344054;
+    background: #f1f3f8;
+    border-right: 1px solid #dfe4ec;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+.file-picker-button:hover {
+    background: #e7eaf1;
+}
+
+.file-picker-name {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0 .8rem;
+    color: var(--muted);
+    font-size: .8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn {
+    min-height: 40px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: .82rem;
+    transition: all .2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, #6868e4, var(--primary-dark));
+    box-shadow: 0 9px 22px rgba(91,91,214,.22);
+}
+
+.btn-success {
+    border-color: #16845d;
+    background: #16845d;
+}
+
+.btn-danger {
+    border-color: #c44555;
+    background: #c44555;
+}
+
+/* =========================================================
+Panel laporan, tab, dan pencarian
+========================================================= */
+.metadata-note {
+    color: #685323;
+    background: #fffaf0;
+    border: 1px solid #f0dfb8;
+    border-radius: 14px;
+    font-size: .78rem;
+}
+
+.download-actions {
+    border-left: 1px solid var(--line);
+    padding-left: 1rem;
+}
+
+/* Toolbar billing dan aksi untuk dokumen terbaru. */
+.report-action-toolbar {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(100px, 1fr));
+    align-items: end;
+    gap: .5rem;
+}
+
+.report-billing-field {
+    min-width: 0;
+}
+
+.report-billing-toggle {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 40px;
+    padding: .55rem .75rem;
+    overflow: hidden;
+    color: var(--text);
+    background: #fff;
+    border-color: var(--line);
+    text-align: left;
+}
+
+.report-billing-toggle span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.report-billing-toggle::after {
+    margin-left: auto;
+}
+
+.report-billing-menu {
+    width: 100%;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.report-billing-menu .dropdown-item {
+    font-size: .82rem;
+}
+
+.report-action-toolbar > .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: .55rem .65rem;
+    font-size: .78rem;
+    white-space: nowrap;
+}
+
+.app-tabs {
+    width: fit-content;
+    gap: .35rem;
+    padding: .3rem;
+    margin-bottom: .85rem;
+    background: #e9edf5;
+    border-radius: 14px;
+}
+
+.app-tabs .nav-link {
+    color: var(--muted);
+    border-radius: 10px;
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.app-tabs .nav-link.active {
+    color: #fff;
+    background: var(--navy);
+    box-shadow: 0 6px 16px rgba(15,23,42,.18);
+}
+
+.data-panel {
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+}
+
+.tab-search {
+    position: relative;
+    width: min(100%, 420px);
+    margin: .85rem .85rem .15rem;
+}
+
+.tab-search .form-control {
+    min-height: 40px;
+    padding: .5rem 2.5rem .5rem 2.35rem;
+    border-radius: 11px;
+    background: #f8f9fc;
+    font-size: .8rem;
+}
+
+.tab-search-icon {
+    position: absolute;
+    top: 50%;
+    left: .85rem;
+    z-index: 2;
+    color: #8a94a6;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.tab-search-clear {
+    position: absolute;
+    top: 50%;
+    right: .45rem;
+    z-index: 2;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    color: #667085;
+    background: transparent;
+    transform: translateY(-50%);
+}
+
+.tab-search-clear:hover {
+    color: var(--primary-dark);
+    background: #eceefe;
+}
+
+.tab-search-empty {
+    margin: .75rem;
+    padding: 1.2rem;
+    border: 1px dashed #ccd3df;
+    border-radius: 12px;
+    color: var(--muted);
+    background: #fafbfe;
+    text-align: center;
+}
+
+/* =========================================================
+Tabel dan scrollbar horizontal
+========================================================= */
+.table {
+    margin-bottom: 0;
+    white-space: nowrap;
+}
+
+.table thead th {
+    padding: .9rem 1rem;
+    background: #f2f4f8;
+    color: #3b4658;
+    border: 0;
+    border-bottom: 1px solid #dfe4ec;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .035em;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    padding: .85rem 1rem;
+    border-color: #eef1f5;
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    transition: background .15s ease;
+}
+
+.table tbody tr:hover {
+    background: #fafaff;
+}
+
+.table-responsive {
+    border-radius: 18px;
+}
+
+/* Scrollbar digunakan oleh tabel dan tab pada layar sempit. */
+.table-responsive, .app-tabs {
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive::-webkit-scrollbar, .app-tabs::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track, .app-tabs::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 999px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb, .app-tabs::-webkit-scrollbar-thumb {
+    min-width: 48px;
+    border: 2px solid var(--scrollbar-track);
+    border-radius: 999px;
+    background: var(--scrollbar-thumb);
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover, .app-tabs::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+}
+
+.table-responsive::-webkit-scrollbar-corner, .app-tabs::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
+/* =========================================================
+Elemen data, progress, toast, dan modal
+========================================================= */
+.table td a {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    padding: .3rem .5rem;
+    border-radius: 8px;
+}
+
+.table td a:hover {
+    background: #f1f3f8;
+}
+
+.customer-address {
+    min-width: 220px;
+    white-space: normal;
+}
+
+.file-type-icon {
+    width: 38px;
+    height: 38px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 11px;
+    font-size: 1rem;
+}
+
+.file-type-pdf {
+    color: #b42335;
+    background: #fff0f2;
+}
+
+.file-type-excel {
+    color: #147a55;
+    background: #eaf9f2;
+}
+
+.file-name {
+    max-width: 260px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.awalan {
+    color: var(--primary);
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    letter-spacing: .04em;
+}
+
+.progress {
+    height: 1.1rem;
+    border-radius: 999px;
+    background: #e9edf5;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--primary), #8b78e6);
+}
+
+#progressFill {
+    transition: width .3s ease;
+}
+
+#progressStatus {
+    font-size: .75rem;
+}
+
+.toast-container {
+    z-index: 1090;
+}
+
+.modal-header {
+    padding: 1.15rem 1.35rem;
+    border-bottom-color: var(--line);
+}
+
+.modal-body {
+    padding: 1.35rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.35rem;
+    border-top-color: var(--line);
+}
+
+.paket-harga-box {
+    height: 100%;
+    border-color: var(--line) !important;
+    background: #fafbfe;
+}
+
+.paket-harga-label {
+    display: block;
+    min-height: 24px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.paket-harga-box .harga-input {
+    width: 100%;
+}
+
+/* Modal pelanggan dan tombol aksi direktori. */
+.customer-form-dialog .modal-content,
+.customer-list-dialog .modal-content {
+    overflow: hidden;
+    border: 0;
+    border-radius: 18px;
+}
+
+.customer-form-dialog .modal-body,
+.customer-list-dialog .modal-body {
+    overscroll-behavior: contain;
+}
+
+.customer-table-action {
+    width: 1%;
+    min-width: 72px;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.customer-edit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    width: auto;
+    min-height: 32px;
+    padding: .32rem .55rem;
+    font-size: .7rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* =========================================================
+Arsip, dokumen, accordion, dan pagination
+========================================================= */
+.date-accordion {
+    padding: .85rem;
+}
+
+.date-accordion .accordion-item {
+    overflow: hidden;
+    margin-bottom: .75rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.date-accordion .accordion-button {
+    gap: .35rem;
+    color: var(--ink);
+    background: #fff;
+    font-weight: 700;
+    box-shadow: none;
+}
+
+.date-accordion .accordion-button:not(.collapsed) {
+    color: var(--primary-dark);
+    background: #f1f2ff;
+}
+
+.date-accordion .accordion-button::after {
+    margin-left: auto;
+}
+
+.date-title {
+    display: inline-flex;
+    align-items: center;
+}
+
+.file-card-list {
+    display: grid;
+    gap: .75rem;
+}
+
+.file-entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.file-entry:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(15,23,42,.07);
+}
+
+.file-entry-main {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    min-width: 0;
+}
+
+.file-entry-icon {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    font-size: 1.1rem;
+}
+
+.archive-icon {
+    color: #5146c8;
+    background: #eeeeff;
+}
+
+.document-pdf-icon {
+    color: #b42335;
+    background: #fff0f2;
+}
+
+.document-excel-icon {
+    color: #147a55;
+    background: #eaf9f2;
+}
+
+.file-entry-info {
+    min-width: 0;
+}
+
+.file-entry-info h3 {
+    margin: 0 0 .2rem;
+    font-size: .95rem;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.file-entry-subtitle {
+    color: var(--muted);
+    font-size: .78rem;
+    overflow-wrap: anywhere;
+}
+
+.file-entry-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem .8rem;
+    margin-top: .45rem;
+    color: var(--muted);
+    font-size: .74rem;
+}
+
+.file-entry-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+.file-entry-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .4rem;
+    flex: 0 0 auto;
+}
+
+.date-accordion .file-entry-actions .btn {
+    min-width: 0;
+    min-height: 36px;
+    padding: .42rem .55rem;
+    border: 0 !important;
+    background: transparent;
+    box-shadow: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+}
+
+.date-accordion .file-entry-actions .btn:hover, .date-accordion .file-entry-actions .btn:focus-visible {
+    background: #f1f3f8;
+    box-shadow: none;
+}
+
+.date-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .3rem .85rem 1rem;
+}
+
+.pagination-caption {
+    color: var(--muted);
+    font-size: .76rem;
+    font-weight: 600;
+}
+
+.date-pagination .pagination {
+    gap: .25rem;
+}
+
+.date-pagination .page-link {
+    min-width: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px !important;
+    color: var(--primary-dark);
+    text-align: center;
+    box-shadow: none;
+}
+
+.date-pagination .page-item.active .page-link {
+    color: #fff;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.date-pagination .page-item.disabled .page-link {
+    color: #9aa3b2;
+    background: #f3f5f8;
+}
+
+.empty-state {
+    padding: 4rem 1rem;
+    text-align: center;
+    color: var(--muted);
+    background: rgba(255,255,255,.75);
+    border: 1px dashed #ccd3df;
+    border-radius: 20px;
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 1rem;
+    color: var(--primary);
+    background: #eeeeff;
+    border-radius: 20px;
+    font-size: 1.35rem;
+}
+
+/* =========================================================
+Tipografi responsif
+========================================================= */
+body {
+    overflow-x: hidden;
+}
+
+.navbar-brand {
+    font-size: clamp(.95rem, 2vw, 1.1rem);
+}
+
+.page-description {
+    font-size: clamp(.78rem, 1.6vw, .9rem);
+}
+
+.section-heading h2 {
+    font-size: clamp(.94rem, 1.8vw, 1.05rem);
+}
+
+.section-heading p {
+    font-size: clamp(.74rem, 1.45vw, .82rem);
+}
+
+.accordion-button {
+    font-size: clamp(.82rem, 1.6vw, .92rem);
+}
+
+.file-entry-title {
+    font-size: clamp(.82rem, 1.65vw, .94rem);
+    overflow-wrap: anywhere;
+}
+
+.file-entry-meta {
+    font-size: clamp(.7rem, 1.4vw, .78rem);
+    overflow-wrap: anywhere;
+}
+
+/* =========================================================
+Responsif: tablet
+========================================================= */
+@media (max-width: 991.98px) {
+    .page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stat-strip {
+        width: 100%;
+    }
+
+    .download-actions {
+        border-left: 0;
+        padding-left: 0;
+    }
+
+}
+
+/* =====================================================
+Responsif: ponsel dan tablet kecil
+===================================================== */
+@media (max-width: 767.98px) {
+    body {
+        font-size: .85rem;
+    }
+    .btn-group{
+        flex-direction: column;
+        height: 40px;
+        width: 60px;
+    }
+    .page-container {
+        padding-left: .8rem;
+        padding-right: .8rem;
+    }
+
+    .navbar-status {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .page-heading {
+        margin-bottom: 1rem;
+    }
+
+    .stat-strip {
+        width: 100%;
+    }
+
+    .mini-stat {
+        min-height: 58px;
+        padding: .5rem .55rem;
+        border-radius: 11px;
+    }
+
+    .mini-stat span {
+        font-size: .52rem;
+        letter-spacing: .045em;
+    }
+
+    .mini-stat strong {
+        font-size: .86rem;
+    }
+
+    .mini-stat-action strong {
+        font-size: .65rem;
+    }
+
+    .mini-stat i {
+        font-size: .72rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .download-actions {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+    }
+
+    .report-action-toolbar {
+        grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+        gap: .35rem;
+    }
+
+    .report-action-toolbar > .btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 34px;
+        max-height: none;
+        padding: .38rem .2rem;
+        font-size: .7rem;
+        line-height: 1.1;
+    }
+
+    .report-action-toolbar > .btn i {
+        font-size: .68rem;
+    }
+
+    .report-billing-field .form-label {
+        display: none;
+    }
+
+    .report-action-toolbar .report-billing-toggle {
+        min-height: 34px;
+        padding: .38rem .45rem;
+        font-size: .7rem;
+        line-height: 1.1;
+    }
+
+    .report-action-toolbar .report-billing-toggle i {
+        font-size: .68rem;
+    }
+
+    .table {
+        font-size: .78rem;
+    }
+
+    .app-navbar {
+        margin-bottom: 1rem !important;
+    }
+
+    .app-navbar .container-fluid {
+        gap: .65rem;
+    }
+
+    .brand-wrap {
+        min-width: 0;
+    }
+
+    .brand-mark {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+    }
+
+    .brand-subtitle {
+        font-size: .58rem;
+    }
+
+    .app-navbar .btn {
+        padding: .45rem .6rem;
+    }
+
+    .app-navbar .navbar-collapse {
+        width: 100%;
+    }
+
+    .navbar-actions {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+        gap: .15rem;
+        padding: .55rem 0 .2rem;
+    }
+
+    .navbar-actions .navbar-status, .navbar-actions .btn {
+        width: 100%;
+        justify-content: flex-start;
+        text-align: left;
+        padding: .65rem .5rem;
+    }
+
+    .navbar-actions .btn-light {
+        color: #fff;
+        background: transparent;
+    }
+
+    .navbar-actions .btn-light:hover {
+        background: rgba(255,255,255,.1);
+    }
+
+    .page-title {
+        font-size: clamp(1.35rem, 7vw, 1.8rem);
+    }
+
+    .eyebrow {
+        font-size: .62rem;
+    }
+
+    .section-heading {
+        align-items: flex-start;
+        gap: .65rem;
+    }
+
+    .section-icon {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+    }
+
+    .app-tabs {
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .app-tabs .nav-link {
+        white-space: nowrap;
+        font-size: clamp(.75rem, 3.2vw, .84rem);
+        padding: .65rem .75rem;
+    }
+
+    .tab-search {
+        width: auto;
+        margin: .75rem .75rem .1rem;
+    }
+
+    .tab-search .form-control {
+        min-height: 40px;
+        font-size: 16px;
+    }
+
+    .accordion-button {
+        padding: .8rem;
+        align-items: flex-start;
+    }
+
+    .date-title {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .accordion-button .badge {
+        font-size: .65rem;
+        white-space: nowrap;
+    }
+
+    .accordion-body {
+        padding: .75rem;
+    }
+
+    .file-entry {
+        align-items: stretch;
+        flex-direction: column;
+        padding: .75rem;
+        gap: .7rem;
+    }
+
+    .file-entry-icon {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+    }
+
+    .file-entry-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        justify-content: stretch;
+        gap: .45rem;
+    }
+
+    .file-entry-actions .btn {
+        width: 80%;
+        max-width: 100%;
+        flex: 1 1 calc(50% - .4rem);
+        margin: 0 !important;
+    }
+
+    .date-pagination {
+        align-items: stretch;
+        flex-direction: column;
+        width: 80%;
+    }
+
+    .date-pagination .pagination {
+        justify-content: center;
+    }
+
+    .form-control, .form-select {
+        font-size: 16px;
+    }
+
+    .modal {
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    .modal-dialog {
+        width: calc(100% - 1rem);
+        max-width: none;
+        margin: .5rem auto;
+    }
+
+    .modal-dialog-centered {
+        min-height: calc(100% - 1rem);
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .modal-body {
+        min-width: 0;
+    }
+
+    .modal-title {
+        font-size: 1rem;
+    }
+
+    .modal-body, .modal-footer {
+        padding: .9rem;
+    }
+
+    .page-link {
+        min-width: 36px;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .toast-container {
+        width: calc(100% - 1.5rem);
+        left: .75rem !important;
+        right: .75rem !important;
+    }
+
+    .toast {
+        width: 100%;
+    }
+
+    .table-responsive::-webkit-scrollbar, .app-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+
+}
+
+/* =====================================================
+Responsif: ponsel kecil
+===================================================== */
+@media (max-width: 575.98px) {
+    html {
+        font-size: 13px;
+    }
+
+    .form-control, .form-select {
+        min-height: 40px;
+        padding: .45rem .65rem;
+        font-size: 16px;
+        line-height: 1.35;
+    }
+
+    .form-control::placeholder {
+        font-size: 14px;
+    }
+
+    input[type="date"].form-control {
+        font-size: 16px;
+    }
+
+    /* Metadata upload dibuat seukuran kontrol ponsel lain. */
+    #uploadForm #uploadPeriode,
+    #uploadForm #uploadTanggal {
+        width: 100%;
+        min-width: 0;
+        min-height: 40px;
+        height: 40px;
+        padding: .45rem .65rem;
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    #uploadForm #uploadPeriode::placeholder {
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    #uploadForm #uploadTanggal::-webkit-datetime-edit,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-fields-wrapper,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-text,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-day-field,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-month-field,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-year-field {
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    #uploadForm #uploadTanggal::-webkit-calendar-picker-indicator {
+        width: 14px;
+        height: 14px;
+        padding: 2px;
+    }
+
+    .file-picker {
+        height: 40px;
+        border-radius: 10px;
+    }
+
+    .file-picker-button {
+        padding: 0 .7rem;
+        font-size: 12px;
+    }
+
+    .file-picker-name {
+        padding: 0 .65rem;
+        font-size: 12px;
+    }
+
+    .btn {
+        min-height: 40px;
+        padding: .45rem .7rem;
+        font-size: 13px;
+    }
+
+    .input-group-text {
+        padding: .42rem .55rem;
+        font-size: .72rem;
+    }
+
+    .form-label {
+        margin-bottom: .3rem;
+        font-size: .7rem;
+    }
+
+    .form-text {
+        margin-top: .25rem;
+        font-size: .62rem;
+    }
+
+    body {
+        min-height: auto;
+    }
+
+    .page-container {
+        padding-left: .65rem;
+        padding-right: .65rem;
+    }
+
+    .page-heading {
+        gap: .75rem;
+        margin-bottom: .75rem;
+    }
+
+    .page-description {
+        margin-top: .25rem;
+        line-height: 1.45;
+    }
+
+    .app-navbar .btn {
+        font-size: .72rem;
+    }
+
+    .stat-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .45rem;
+    }
+
+    .mini-stat {
+        min-height: 52px;
+        padding: .42rem .5rem;
+    }
+
+    .premium-card.mb-4 {
+        margin-bottom: .75rem !important;
+    }
+
+    .card-body {
+        padding: .8rem;
+    }
+
+    .section-heading {
+        margin-bottom: .75rem;
+    }
+
+    .metadata-note {
+        padding: .7rem !important;
+        margin-bottom: .75rem !important;
+    }
+
+    .app-tabs {
+        margin-bottom: .55rem;
+    }
+
+    .date-accordion {
+        padding: .55rem;
+    }
+
+    .date-accordion .accordion-item {
+        margin-bottom: .5rem;
+    }
+
+    .date-accordion .accordion-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .download-actions {
+        grid-template-columns: 1fr !important;
+    }
+
+    .download-actions .btn {
+        grid-column: auto !important;
+        width: 100%;
+    }
+
+    .file-entry-actions {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .15rem;
+    }
+
+    #documentDateAccordion .file-entry-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .date-accordion .file-entry-actions .btn {
+        min-height: 32px;
+        padding: .3rem .08rem;
+        gap: .15rem;
+        font-size: .62rem;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .date-accordion .file-entry-actions .btn i {
+        font-size: .62rem;
+    }
+
+    .date-accordion .accordion-button {
+        font-size: .72rem;
+        padding: .65rem;
+    }
+
+    .accordion-button .badge {
+        font-size: .56rem;
+    }
+
+    .file-entry-info h3 {
+        font-size: .78rem;
+    }
+
+    .file-entry-subtitle {
+        font-size: .66rem;
+    }
+
+    .file-entry-meta {
+        gap: .25rem .5rem;
+        margin-top: .3rem;
+        font-size: .61rem;
+    }
+
+    .app-tabs .nav-link {
+        font-size: .68rem;
+        padding: .55rem .62rem;
+    }
+
+    .date-pagination {
+        align-items: stretch;
+    }
+
+    .date-pagination .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .date-pagination-caption {
+        text-align: center;
+    }
+
+    .alert {
+        padding: .75rem;
+        font-size: .8rem;
+    }
+
+    .table-responsive .table {
+        min-width: 680px;
+    }
+
+    .empty-state {
+        padding: 1.5rem .75rem;
+    }
+
+}
+
+/* =========================================================
+Halaman manajemen akun
+========================================================= */
+.account-page-container {
+    padding-top: 0;
+}
+
+.account-heading {
+    align-items: flex-start;
+}
+
+.company-settings-card,
+.account-section {
+    margin-bottom: 1rem;
+}
+
+.management-section-heading,
+.management-account-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.management-section-heading h2 {
+    margin: 0 0 .2rem;
+    font-size: 1.05rem;
+}
+
+.management-section-heading p {
+    margin: 0;
+    color: var(--muted);
+    font-size: .78rem;
+}
+
+.company-logo-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 150px;
+    width: 150px;
+    height: 72px;
+    padding: .45rem;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.company-logo-preview img {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.company-logo-preview.is-empty {
+    flex-direction: column;
+    gap: .2rem;
+    color: var(--muted);
+    background: #f8fafc;
+    font-size: .65rem;
+}
+
+.company-logo-preview.is-empty i {
+    font-size: 1.15rem;
+}
+
+.company-settings-form {
+    margin-top: 1rem;
+}
+
+.company-settings-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.management-account-heading {
+    align-items: center;
+}
+
+.account-section-count {
+    flex: 0 0 auto;
+    padding: .35rem .6rem;
+    color: #475467;
+    background: #f2f4f7;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 600;
+}
+
+.customer-account-entry {
+    border-color: #cde8dc;
+    background: #fbfffd;
+}
+
+.customer-account-entry .account-icon {
+    color: #16845d;
+    background: #e7f7f0;
+}
+
+.account-pagination {
+    padding: .75rem 1rem;
+    border-top: 1px solid var(--line);
+}
+
+.account-page .panel {
+    overflow: hidden;
+}
+
+.account-page .billing-box {
+    max-height: 190px;
+    overflow-y: auto;
+    margin: 0;
+    border-color: var(--line) !important;
+    background: #fafbfe;
+}
+
+.account-page .billing-box label {
+    display: flex;
+    align-items: center;
+    min-height: 32px;
+    color: #344054;
+    font-size: .8rem;
+}
+
+.account-page .username {
+    font-family: monospace;
+    font-weight: 700;
+}
+
+.account-page .user-list-row {
+    cursor: pointer;
+    transition: background-color .15s ease;
+}
+
+.account-page .user-list-row:hover {
+    background: #fafaff;
+}
+
+.account-page .user-list-row:focus-visible {
+    outline: 3px solid rgba(91,91,214,.2);
+    outline-offset: 2px;
+}
+
+.account-card-list {
+    gap: .65rem;
+}
+
+.account-entry {
+    position: relative;
+    box-shadow: none;
+}
+
+.account-icon {
+    color: #5146c8;
+    background: #eeeeff;
+}
+
+.account-entry .file-entry-info h3 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .2rem;
+}
+
+.account-entry .file-entry-info h3 .badge {
+    font-family: 'Poppins', sans-serif;
+    font-size: .58rem;
+}
+
+.account-entry-meta strong {
+    color: #475467;
+    font-weight: 600;
+}
+
+.account-entry-meta span:first-child {
+    max-width: min(100%, 520px);
+    white-space: normal;
+}
+
+.account-entry-actions .btn {
+    border: 0 !important;
+    background: transparent;
+    box-shadow: none;
+}
+
+.account-entry-actions .btn:hover {
+    background: #f1f3f8;
+}
+
+.account-edit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    width: auto;
+    min-height: 32px;
+    padding: .35rem .55rem;
+    font-size: .7rem;
+    white-space: nowrap;
+}
+
+/* Penyesuaian halaman akun pada ponsel dan tablet kecil. */
+@media (max-width: 767.98px) {
+    .account-page .account-heading {
+        margin-bottom: 1rem;
+    }
+
+    .account-page .card-body.p-4 {
+        padding: 1rem !important;
+    }
+
+    .management-section-heading {
+        align-items: center;
+    }
+
+    .company-logo-preview {
+        flex-basis: 105px;
+        width: 105px;
+        height: 58px;
+    }
+
+    .company-settings-actions .btn {
+        width: 100%;
+    }
+
+    .account-page .billing-box {
+        max-height: 230px;
+        padding: .75rem !important;
+    }
+
+    .account-page .billing-box label {
+        min-height: 38px;
+        font-size: .85rem;
+    }
+
+    .account-page .account-submit {
+        width: 100%;
+    }
+
+    .account-page .modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .55rem;
+    }
+
+    .account-page .modal-footer .btn {
+        width: 100%;
+        margin: 0;
+    }
+
+    .account-card-list {
+        padding: .75rem !important;
+    }
+
+    .account-entry-actions {
+        position: absolute;
+        top: .7rem;
+        right: .7rem;
+        display: block;
+        width: auto;
+    }
+
+    .account-entry-actions .btn {
+        width: auto;
+        min-height: 30px;
+        padding: .3rem .5rem;
+        font-size: .66rem;
+    }
+
+    .account-page .user-list-row .file-entry-main {
+        padding-right: 4.2rem;
+    }
+
+}
+
+/* Penyesuaian tambahan halaman akun pada ponsel kecil. */
+@media (max-width: 575.98px) {
+    .account-page .page-description {
+        max-width: 100%;
+        font-size: .78rem;
+    }
+
+    .account-page .form-label {
+        font-size: .78rem;
+    }
+
+    .account-page .form-check-input {
+        width: 1.15rem;
+        height: 1.15rem;
+    }
+
+    .account-entry-meta {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .3rem;
+    }
+
+    .account-entry-meta span {
+        align-items: flex-start;
+    }
+
+}
+
+/* =========================================================
+Halaman login
+========================================================= */
+.login-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+}
+
+.login-shell {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 2rem;
+}
+
+.login-card {
+    display: grid;
+    grid-template-columns: minmax(300px, .9fr) minmax(360px, 1.1fr);
+    width: min(100%, 880px);
+    min-height: 520px;
+    overflow: hidden;
+    border: 1px solid rgba(226,232,240,.9);
+    border-radius: 26px;
+    background: #fff;
+    box-shadow: 0 28px 75px rgba(15,23,42,.14);
+}
+
+.login-hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 2.25rem;
+    color: #fff;
+    background: radial-gradient(circle at 85% 15%, rgba(200,169,107,.24), transparent 16rem), linear-gradient(145deg, #090f1d, #17233d);
+}
+
+.login-brand, .login-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+}
+
+.login-brand-mark {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 13px;
+    color: #17120a;
+    background: linear-gradient(145deg, #ead39f, var(--gold));
+    box-shadow: 0 8px 24px rgba(200,169,107,.25);
+}
+
+.login-hero-content {
+    max-width: 330px;
+}
+
+.login-hero-label {
+    display: block;
+    margin-bottom: .75rem;
+    color: #d9c28f;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.login-hero-content h1 {
+    margin: 0;
+    font-size: clamp(1.65rem, 3vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -.04em;
+}
+
+.login-hero-content p {
+    margin: 1rem 0 0;
+    color: #aeb9ca;
+    font-size: .82rem;
+    line-height: 1.7;
+}
+
+.login-hero-note {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: #9ba7bb;
+    font-size: .7rem;
+}
+
+.login-hero-note i {
+    color: #65d69e;
+}
+
+.login-form-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 6vw, 4.25rem);
+}
+
+.login-mobile-brand {
+    display: none;
+    color: var(--navy);
+}
+
+.login-title {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -.04em;
+}
+
+.login-description {
+    margin: .55rem 0 1.75rem;
+    color: var(--muted);
+    font-size: .82rem;
+    line-height: 1.6;
+}
+
+.login-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    margin-bottom: 1.25rem;
+    padding: .8rem .9rem;
+    border: 0;
+    border-radius: 12px;
+    font-size: .75rem;
+}
+
+.login-alert i {
+    margin-top: .15rem;
+}
+
+.login-form {
+    display: grid;
+    gap: 1.15rem;
+}
+
+.login-field {
+    min-width: 0;
+}
+
+.login-input-wrap {
+    position: relative;
+}
+
+.login-input-wrap > i {
+    position: absolute;
+    top: 50%;
+    left: .9rem;
+    z-index: 2;
+    color: #98a2b3;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.login-input-wrap .form-control {
+    padding-left: 2.65rem;
+}
+
+.login-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 46px;
+    margin-top: .35rem;
+    padding-right: 1rem;
+    padding-left: 1rem;
+}
+
+/* Login menjadi satu panel agar tetap lega pada ponsel. */
+@media (max-width: 767.98px) {
+    .login-shell {
+        padding: 1rem;
+    }
+
+    .login-card {
+        grid-template-columns: 1fr;
+        width: min(100%, 440px);
+        min-height: auto;
+        border-radius: 22px;
+    }
+
+    .login-hero {
+        display: none;
+    }
+
+    .login-form-panel {
+        padding: 2rem;
+    }
+
+    .login-mobile-brand {
+        display: flex;
+        margin-bottom: 2rem;
+    }
+
+}
+
+@media (max-width: 575.98px) {
+    .login-shell {
+        align-items: center;
+        padding: .75rem;
+    }
+
+    .login-card {
+        border-radius: 18px;
+    }
+
+    .login-form-panel {
+        padding: 1.35rem;
+    }
+
+    .login-mobile-brand {
+        margin-bottom: 1.5rem;
+    }
+
+    .login-brand-mark {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+        border-radius: 11px;
+    }
+
+    .login-description {
+        margin-bottom: 1.35rem;
+    }
+
+    .login-form {
+        gap: .9rem;
+    }
+
+    .login-submit {
+        min-height: 42px;
+    }
+
+}
+
+/* =========================================================
+Komponen akun dan tautan customer pada area manajemen
+========================================================= */
+.account-add-button {
+    flex: 0 0 auto;
+}
+
+.login-customer-link {
+    margin-top: 1.15rem;
+    color: #667085;
+    font-size: .72rem;
+    text-align: center;
+}
+
+.login-customer-link a {
+    color: #5146c8;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.login-customer-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 767.98px) {
+    .account-heading {
+        gap: .75rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .account-add-button {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+Modal pelanggan pada layar ponsel
+========================================================= */
+@media (max-width: 575.98px) {
+    #customerModal,
+    #listCustomerModal {
+        padding: 0 !important;
+    }
+
+    #customerModal .customer-form-dialog,
+    #listCustomerModal .customer-list-dialog {
+        width: calc(100% - 1rem);
+        height: calc(100dvh - 1rem);
+        min-height: 0;
+        margin: .5rem auto;
+    }
+
+    #customerModal .modal-content,
+    #listCustomerModal .modal-content {
+        max-height: calc(100dvh - 1rem);
+        border-radius: 15px;
+    }
+
+    #customerModal .modal-header,
+    #listCustomerModal .modal-header {
+        align-items: flex-start;
+        gap: .55rem;
+        padding: .75rem;
+    }
+
+    #customerModal .modal-header .section-heading,
+    #listCustomerModal .modal-header .section-heading {
+        min-width: 0;
+        margin: 0;
+    }
+
+    #customerModal .modal-header .section-icon,
+    #listCustomerModal .modal-header .section-icon {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        border-radius: 10px;
+    }
+
+    #customerModal .modal-header h2,
+    #listCustomerModal .modal-header h2 {
+        font-size: .86rem;
+    }
+
+    #customerModal .modal-header p,
+    #listCustomerModal .modal-header p {
+        font-size: .61rem;
+        line-height: 1.4;
+    }
+
+    #customerModal .modal-body {
+        padding: .75rem;
+    }
+
+    #customerModal .customer-profile-fields {
+        --bs-gutter-y: .65rem;
+    }
+
+    #customerModal textarea.form-control {
+        min-height: 68px;
+        resize: vertical;
+    }
+
+    #customerModal .customer-billing-section {
+        margin-bottom: .75rem !important;
+        padding: .7rem !important;
+        border-radius: 12px !important;
+    }
+
+    #customerModal .customer-billing-section .btn-group {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%;
+        gap: .35rem;
+    }
+
+    #customerModal .customer-billing-section .btn-group > .btn {
+        width: 100%;
+        min-height: 34px;
+        padding: .35rem .3rem;
+        border: 1px solid var(--primary);
+        border-radius: 9px !important;
+        font-size: .64rem;
+        white-space: nowrap;
+    }
+
+    #customerModal .customer-package-adder {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .4rem;
+    }
+
+    #customerModal .customer-package-adder > .form-control,
+    #customerModal .customer-package-adder > .btn {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 9px !important;
+    }
+
+    #customerModal .customer-package-adder > .btn {
+        min-height: 34px;
+        padding: .35rem .55rem;
+        font-size: .66rem;
+    }
+
+    #customerModal .paket-harga-box {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(105px, .7fr);
+        align-items: center;
+        gap: .6rem;
+        padding: .55rem !important;
+        border-radius: 10px !important;
+    }
+
+    #customerModal .paket-harga-label {
+        min-height: 0;
+        margin: 0;
+        font-size: .66rem;
+        line-height: 1.35;
+    }
+
+    #customerModal .paket-harga-box .harga-input {
+        min-height: 34px;
+        padding: .35rem .5rem;
+        font-size: 14px;
+    }
+
+    #customerModal .modal-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .5rem;
+        padding: .7rem .75rem;
+    }
+
+    #customerModal .modal-footer .btn {
+        width: 100%;
+        min-height: 36px;
+        margin: 0;
+        padding: .4rem .6rem;
+        font-size: .7rem;
+    }
+
+    #listCustomerModal .modal-body {
+        padding: .55rem;
+    }
+
+    #listCustomerModal .table-responsive {
+        border: 1px solid var(--line);
+        border-radius: 11px;
+    }
+
+    #listCustomerModal .table {
+        min-width: 650px;
+        margin-bottom: 0;
+    }
+
+    #listCustomerModal .customer-table-action {
+        position: sticky;
+        right: 0;
+        z-index: 2;
+        min-width: 62px;
+        padding-right: .35rem;
+        padding-left: .35rem;
+        background: #fff;
+        box-shadow: -5px 0 10px rgba(15, 23, 42, .04);
+    }
+
+    #listCustomerModal thead .customer-table-action {
+        z-index: 3;
+        background: #f7f8fb;
+    }
+
+    #listCustomerModal tbody tr:hover .customer-table-action {
+        background: #fafaff;
+    }
+
+    #listCustomerModal .customer-edit-button {
+        width: auto;
+        min-width: 0;
+        min-height: 30px;
+        padding: .3rem .45rem;
+        border-radius: 8px;
+        font-size: .64rem;
+    }
+}
