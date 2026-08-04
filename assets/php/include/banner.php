@@ -1,5 +1,5 @@
 <?php
-$xccLkmn = 'planetINV';
+$xccLkmn = 'plannetINV';
 $titles = [
     'index'       => 'Beranda',
     'login'       => 'Login',
