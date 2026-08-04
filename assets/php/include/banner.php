@@ -1,5 +1,5 @@
 <?php
-$appName = 'plannetINV';
+$appName = 'plannet';
 $xccLkmn = 'plannetINV';
 $titles = [
     'index'       => 'Beranda',
