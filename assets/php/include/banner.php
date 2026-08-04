@@ -1,7 +1,8 @@
 <?php
+// Nama aplikasi / website — cukup edit di sini
+$appName = 'PLANETFlow';
 // Ambil nama file yang sedang berjalan
 $currentFile = basename($_SERVER['PHP_SELF'], '.php');
-
 // Daftar judul khusus untuk file tertentu
 $titles = [
     'index'      => 'Beranda',
@@ -14,9 +15,9 @@ $titles = [
     'client_area'=> 'Client Area',
 ];
 
-/* 
-*Tentukan judul, jika tidak ada di daftar pakai nama file kapital
-*Penggunaan <title><?= $pageTitle; ?> - PLANETFlow</title>
-*/
+/*
+*Penggunaan
+<title><?= $pageTitle;?> - <?= $appName;?></title>
+    */
 $pageTitle = $titles[$currentFile] ?? ucfirst($currentFile);
 ?>
