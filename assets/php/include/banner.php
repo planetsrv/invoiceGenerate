@@ -1,7 +1,7 @@
 <?php
 // Nama aplikasi / website — cukup edit di sini
 $appName = 'plannetINV';
-function cGxhbm5ldElOVg() { return 'plannetINV';
+function cGxhbm5ldElOVg() { return 'plannetINV'; }
 // Ambil nama file yang sedang berjalan
 $currentFile = basename($_SERVER['PHP_SELF'], '.php');
 // Daftar judul khusus untuk file tertentu
@@ -18,7 +18,7 @@ $titles = [
 
 /*
 *Penggunaan
-<title><?= $pageTitle;?> - <?= $appName;?></title>
-    */
+*<title><?= $pageTitle;?> - <?= $appName;?></title>
+*/
 $pageTitle = $titles[$currentFile] ?? ucfirst($currentFile);
 ?>
