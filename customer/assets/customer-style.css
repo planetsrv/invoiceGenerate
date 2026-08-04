@@ -1,11 +1,4 @@
-/* =========================================================
-Stylesheet khusus portal customer PLANETFlow
-Dimuat setelah main-style.css agar area manajemen tetap terpisah.
-========================================================= */
 
-/* =========================================================
-Client area
-========================================================= */
 .client-page-container {
     padding-top: 0;
 }
