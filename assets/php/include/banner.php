@@ -1,6 +1,6 @@
 <?php
 // Nama aplikasi / website — cukup edit di sini
-$appName = 'PLANETFlow';
+$appName = 'plannetINV';
 // Ambil nama file yang sedang berjalan
 $currentFile = basename($_SERVER['PHP_SELF'], '.php');
 // Daftar judul khusus untuk file tertentu
