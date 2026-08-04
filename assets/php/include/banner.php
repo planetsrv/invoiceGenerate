@@ -1,5 +1,5 @@
 <?php
-$xccLkmn = 'plannetINV';
+$xccLkmn = 'netINV';
 $titles = [
     'index'       => 'Beranda',
     'login'       => 'Login',
