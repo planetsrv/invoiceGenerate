@@ -1,71 +1,34 @@
 ## Generate Invoice
+PHP 8.2
+
 Sebelum memulai lakukan composer install di dalam folder proyek
- Aplikasi ini memproes data prefik voucher (Mengambil 3 prefix kode voucher)
 
-## Data yang di proses upload
+- Aplikasi ini memproes data prefik voucher (Mengambil 3 prefix kode voucher)
+- Aplikasi membaca data berdasarkan posisi kolom, bukan berdasarkan nama header.
+- Pengaturan saat ini berada di `assets/php/cont/cont.php`:
 
-Aplikasi membaca data berdasarkan posisi kolom, bukan berdasarkan nama header.
-
-Pengaturan saat ini berada di `assets/php/cont/cont.php`:
-
+## Contoh format data
+Data pertama berada di baris ke 6 
 ```php
-define('EXCEL_HEADER_ROW', 5);
-define('EXCEL_CODE_COLUMN', 3);
-define('EXCEL_PACKAGE_COLUMN', 4);
-define('EXCEL_COST_COLUMN', 6);
+define('EXCEL_HEADER_ROW', 5); // Menentukan Baris Header
 ```
 
-Data yang dibaca:
+Kode voucher berada di kolom ke 3
+```php
+define('EXCEL_CODE_COLUMN', 3); //Menentuka Kolom Voucher
+```
 
-| Posisi | Data | Keterangan |
-|---|---|---|
-| Baris 5 | Header | Tidak ikut diproses |
-| Kolom C | Kode voucher | Tiga karakter pertama menjadi prefix pelanggan |
-| Kolom D | Paket | Nama paket voucher |
-| Kolom F | Biaya | Biaya dari data voucher |
+Paket pelanggan berada di kolom ke 4
+```php
+define('EXCEL_PACKAGE_COLUMN', 4); //Menentukan Kolom Paket 
+```
+Harga dari billing 
+```php
+define('EXCEL_COST_COLUMN', 6);
+```
+Harga untuk pelanggan di buat ketika menambahkan pelanggan
 
-Data mulai diproses dari baris 6 sampai baris terakhir.
-
-Contoh:
-
-| Kode voucher | Paket | Biaya |
-|---|---|---:|
-| AKH0001 | 12 JAM | 1.000 |
-| AKH0002 | 6 JAM | 5.000 |
-| BCD0001 | 7 HARI | 15.000 |
-
-Proses upload:
-
-   - Baris diproses jika kode dan paket terisi.
-   - Tiga karakter pertama kode diambil sebagai prefix. Contoh `AKH0001` menjadi `AKH`.
-   - Paket baru dari file otomatis dimasukkan ke master paket.
-   - Jumlah voucher dihitung berdasarkan prefix dan paket.
-   - Biaya yang bukan angka akan dianggap `0`.
-   - Total invoice dihitung dari jumlah voucher dikalikan harga paket pelanggan.
-   - Periode dan tanggal dari formulir upload digunakan pada rekap, Excel, dan PDF.
-
-Data disimpan ke:
-
-- `uploaded_files` untuk informasi file upload.
-- File asli di `files/uploads` untuk rincian lengkap setiap voucher.
-- `rekap` untuk jumlah voucher dan total biaya per prefix dan paket.
-- `invoices` untuk total tagihan pelanggan.
-- `paket_master` untuk daftar paket.
-
-Kode voucher satu per satu tidak disimpan lagi ke database. Database hanya menyimpan
-rekap ringkas yang diperlukan untuk halaman customer dan pembuatan invoice, sehingga
-data lama tidak membebani database. Rincian lengkap tetap tersedia pada file upload asli.
-
-Catatan:
-
-- Sesuaikan dokumen yang akan i proses `cont.php`.
-- Kode voucher sebaiknya memiliki minimal tiga karakter.
-- Nama paket pada file harus konsisten dengan harga paket pelanggan.
-- Paket yang belum memiliki harga akan menghasilkan tagihan `0`.
-
-## Insatalasi
-Cari ekstensi berikut di `php.ini`, kemudian hapus tanda `;` di depannya agar aktif:
-
+Pastikan extensi aktif di `php.ini` tidak di awali `;` 
 ```ini
 extension=mysqli
 extension=gd
@@ -75,6 +38,7 @@ extension=fileinfo
 extension=xml
 extension=xmlreader
 extension=xmlwriter
+allow_url_include=on
 ```
 
 Yang paling penting untuk aplikasi ini adalah:
@@ -88,95 +52,14 @@ Untuk mengecek ekstensi yang aktif:
 ```powershell
 php -m
 ```
-`
-Jika folder `vendor` hilang atau muncul error `vendor/autoload.php`
 
-```powershell
-composer install
-```
-K
-## Login saya
-
-Login awal manajemen:
-
+Default akun
 ```text
 Username : admin
 Password : admin
 ```
 
-Login manajemen:
-
-```text
-http://localhost/login.php
-```
-
-Login pelanggan:
-
-```text
-http://localhost/customer/login.php
-`
-
-### Siapkan data awal
-
-1. Login sebagai admin.
-2. Buat data billing jika belum tersedia.
-3. Tambahkan pelanggan.
-4. Isi paket dan harga pelanggan.
-
-Ketika pelanggan ditambahkan, akun customer otomatis dibuat dan dapat dilihat pada halaman Manajemen.
-
-### Atur identitas perusahaan
-
-Buka halaman Manajemen, kemudian isi:
-
-   - Nama perusahaan.
-   - Nomor customer service (CS).
-   - Nomor telepon.
-   - Email.
-   - Website.
-   - Alamat perusahaan.
-   - Informasi pembayaran.
-   - Catatan invoice.
-   - Logo perusahaan melalui tombol **Upload Logo**.
-      
-      Informasi ini digunakan pada PDF invoice customer.
-
-Upload data voucher
-
-   1. Buka halaman utama.
-   2. Pilih billing.
-   3. Isi periode.
-   4. Isi tanggal.
-   5. Tekan tombol pilih file.
-   6. Pilih file `.xlsx`, `.xls`, `.ods`, atau `.csv`.
-
-Setelah file dipilih, proses upload berjalan otomatis.
-
-### Generate dokumen
-   - Melihat rekap.
-   - Mencari pelanggan berdasarkan nama.
-   - Membuka Excel.
-   - Membuka PDF.
-   - Mengunduh ZIP.
-   - Melihat arsip dokumen.
-
-Tanggal dan periode yang saya isi sebelum upload akan digunakan secara konsisten pada Excel, PDF manajemen, dan PDF customer.
-
-### Area customer
-
-Customer dapat:
-
-- Melihat tagihan terbaru.
-- Melihat riwayat tagihan sebanyak 25 data per halaman.
-- Mencetak invoice PDF.
-- Mengubah nomor telepon.
-- Mengubah alamat.
-
-Jika telepon atau alamat belum diisi, aplikasi menampilkan peringatan di bagian atas halaman customer.
-
-## Jika dipindahkan ke server
-
-Catatan yang harus saya periksa:
+## Catatan
 
 - Versi PHP minimal 8.2.
 - Ekstensi `gd`, `zip`, `mysqli`, `mbstring`, `fileinfo`, dan XML aktif.
@@ -196,8 +79,6 @@ post_max_size = 24M
 max_execution_time = 120
 memory_limit = 256M
 ```
-
-Restart Apache atau PHP setelah mengubah konfigurasi.
 
 ## Masalah yang sering terjadi
 
@@ -230,10 +111,3 @@ extension=fileinfo
 
 Naikkan `upload_max_filesize` dan `post_max_size` pada `php.ini`, kemudian restart Apache.
 
-### Perubahan tampilan tidak muncul
-
-Lakukan hard refresh pada browser:
-
-```text
-Ctrl + F5
-```
