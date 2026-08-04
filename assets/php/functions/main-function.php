@@ -12,6 +12,9 @@ function getDB(): ?mysqli {
 }
 
 function ensureDatabase(): void {
+    static $done = false;
+    if ($done) return;
+
     $conn = new mysqli(DB_HOST, DB_USER, DB_PASS);
     if ($conn->connect_error) die('Database connection failed: ' . $conn->connect_error);
     $conn->query("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
@@ -26,6 +29,7 @@ function ensureDatabase(): void {
         `uploaded_by_user_id` INT NOT NULL,
         `uploaded_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         INDEX `idx_uploaded_date` (`tanggal`, `id`),
+        INDEX `idx_uploaded_created` (`uploaded_at`, `id`),
         INDEX `idx_uploaded_user` (`uploaded_by_user_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
@@ -33,7 +37,7 @@ function ensureDatabase(): void {
         `id` INT AUTO_INCREMENT PRIMARY KEY,
         `file_id` INT NOT NULL DEFAULT 1,
         `kode` VARCHAR(100) NOT NULL,
-        `awalan` VARCHAR(10) NOT NULL,
+        `prefix` VARCHAR(10) NOT NULL,
         `paket` VARCHAR(100) NOT NULL,
         `biaya` DECIMAL(15,2) NOT NULL DEFAULT 0,
         INDEX `idx_file_id` (`file_id`)
@@ -42,28 +46,47 @@ function ensureDatabase(): void {
     $conn->query("CREATE TABLE IF NOT EXISTS `rekap` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
         `file_id` INT NOT NULL DEFAULT 1,
-        `awalan` VARCHAR(10) NOT NULL,
+        `prefix` VARCHAR(10) NOT NULL,
         `paket` VARCHAR(100) NOT NULL,
         `jumlah` INT NOT NULL DEFAULT 0,
-        UNIQUE KEY `uk_file_awalan_paket` (`file_id`, `awalan`, `paket`)
+        `total_biaya` DECIMAL(15,2) NOT NULL DEFAULT 0,
+        UNIQUE KEY `uk_file_prefix_paket` (`file_id`, `prefix`, `paket`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Migrasi satu kali: padatkan rincian lama menjadi total biaya per rekap.
+    // Setelah diringkas, kode voucher lengkap tetap tersedia pada file upload asli.
+    $totalBiayaColumn = $conn->query("SHOW COLUMNS FROM `rekap` LIKE 'total_biaya'");
+    if ($totalBiayaColumn && $totalBiayaColumn->num_rows === 0) {
+        $conn->query("ALTER TABLE `rekap` ADD COLUMN `total_biaya` DECIMAL(15,2) NOT NULL DEFAULT 0 AFTER `jumlah`");
+        $conn->query("UPDATE rekap r
+            LEFT JOIN (
+                SELECT file_id, prefix, paket, SUM(biaya) AS total_biaya
+                FROM rincian
+                GROUP BY file_id, prefix, paket
+            ) detail ON detail.file_id = r.file_id AND detail.prefix = r.prefix AND detail.paket = r.paket
+            SET r.total_biaya = COALESCE(detail.total_biaya, 0)");
+        $conn->query("DELETE FROM rincian");
+        // Kembalikan ruang tabel setelah rincian lama selesai dipadatkan.
+        $conn->query("OPTIMIZE TABLE rincian");
+    }
 
     $conn->query("CREATE TABLE IF NOT EXISTS `prefix_customers` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
-        `awalan` VARCHAR(10) NOT NULL UNIQUE,
+        `prefix` VARCHAR(10) NOT NULL UNIQUE,
         `nama_pelanggan` VARCHAR(255) NOT NULL,
         `alamat` TEXT,
         `telepon` VARCHAR(20),
         `billing_id` INT NULL,
-        INDEX `idx_billing_id` (`billing_id`)
+        INDEX `idx_billing_id` (`billing_id`),
+        INDEX `idx_customer_name` (`nama_pelanggan`, `prefix`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     $conn->query("CREATE TABLE IF NOT EXISTS `customer_paket_harga` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
-        `awalan` VARCHAR(10) NOT NULL,
+        `prefix` VARCHAR(10) NOT NULL,
         `paket` VARCHAR(100) NOT NULL,
         `harga` DECIMAL(12,2) NOT NULL DEFAULT 0,
-        UNIQUE KEY `uk_cust_paket` (`awalan`, `paket`)
+        UNIQUE KEY `uk_cust_paket` (`prefix`, `paket`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
     $conn->query("CREATE TABLE IF NOT EXISTS `paket_master` (
@@ -97,19 +120,41 @@ function ensureDatabase(): void {
     $conn->query("CREATE TABLE IF NOT EXISTS `invoices` (
         `id` INT AUTO_INCREMENT PRIMARY KEY,
         `file_id` INT NOT NULL,
-        `awalan` VARCHAR(10) NOT NULL,
+        `prefix` VARCHAR(10) NOT NULL,
         `total_harga` DECIMAL(12,2) NOT NULL DEFAULT 0,
         `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE KEY `uk_file_awalan` (`file_id`, `awalan`),
-        INDEX `idx_invoice_customer` (`awalan`, `file_id`)
+        UNIQUE KEY `uk_file_prefix` (`file_id`, `prefix`),
+        INDEX `idx_invoice_customer` (`prefix`, `file_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    // Indeks untuk database yang dibuat sebelum optimasi pagination.
+    $uploadedCreatedIndex = $conn->query("SHOW INDEX FROM uploaded_files WHERE Key_name = 'idx_uploaded_created'");
+    if ($uploadedCreatedIndex && $uploadedCreatedIndex->num_rows === 0) {
+        $conn->query("ALTER TABLE uploaded_files ADD INDEX idx_uploaded_created (uploaded_at, id)");
+    }
+    $customerNameIndex = $conn->query("SHOW INDEX FROM prefix_customers WHERE Key_name = 'idx_customer_name'");
+    if ($customerNameIndex && $customerNameIndex->num_rows === 0) {
+        $conn->query("ALTER TABLE prefix_customers ADD INDEX idx_customer_name (nama_pelanggan, prefix)");
+    }
+
     $conn->close();
+    $done = true;
 }
 
 function getPaketList(mysqli $db): array {
     $paketList = [];
-    $res = $db->query("SELECT nama FROM paket_master ORDER BY id ASC");
+    if (authIsAdmin()) {
+        $res = $db->query("SELECT nama FROM paket_master ORDER BY id ASC");
+    } else {
+        // User hanya melihat paket yang dimiliki pelanggan dalam billing izinnya.
+        $packageAccess = authBillingCondition('package_customer.billing_id', $db);
+        $res = $db->query("SELECT DISTINCT p.id, p.nama
+            FROM paket_master p
+            INNER JOIN customer_paket_harga h ON h.paket = p.nama
+            INNER JOIN prefix_customers package_customer ON package_customer.prefix = h.prefix
+            WHERE {$packageAccess}
+            ORDER BY p.id ASC");
+    }
     while ($res && $row = $res->fetch_assoc()) $paketList[] = $row['nama'];
     return $paketList;
 }
@@ -205,11 +250,12 @@ function saveGeneratedDocument(
     string $content,
     ?int $billingId = null
 ): array {
-    if (!is_dir(GENERATED_DIR) && !mkdir(GENERATED_DIR, 0755, true) && !is_dir(GENERATED_DIR)) {
+    $type = strtoupper($type);
+    $storageDirectory = $type === 'ZIP' ? ZIP_DIR : GENERATED_DIR;
+    if (!is_dir($storageDirectory) && !mkdir($storageDirectory, 0755, true) && !is_dir($storageDirectory)) {
         throw new RuntimeException('Folder penyimpanan dokumen tidak dapat dibuat.');
     }
 
-    $type = strtoupper($type);
     $stmtName = $db->prepare("SELECT id FROM generated_documents WHERE saved_name = ? LIMIT 1");
     $savedName = '';
     for ($attempt = 0; $attempt < 200; $attempt++) {
@@ -228,7 +274,8 @@ function saveGeneratedDocument(
     // original_name hanya menjadi nama ramah pengguna saat dokumen ditampilkan,
     // diunduh, atau dimasukkan ke ZIP. Nama file fisik server selalu saved_name.
     $originalName = $type.'_'.date('d-m-Y_H-i-s').'.'.$extension;
-    $path = GENERATED_DIR.$savedName;
+    // ZIP dipisahkan dari PDF/Excel agar penyimpanan file tetap terstruktur.
+    $path = $storageDirectory.$savedName;
     if (file_put_contents($path, $content) === false) {
         throw new RuntimeException('Dokumen gagal disimpan ke server.');
     }

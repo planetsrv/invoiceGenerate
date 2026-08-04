@@ -15,6 +15,7 @@ ensureAuthSchema();
 requireStaff();
 if (!is_dir(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0755, true);
 if (!is_dir(GENERATED_DIR)) mkdir(GENERATED_DIR, 0755, true);
+if (!is_dir(ZIP_DIR)) mkdir(ZIP_DIR, 0755, true);
 
 $action = $_GET['action'] ?? ($_POST['action'] ?? '');
 
@@ -26,17 +27,26 @@ $db = getDB();
 $paketList = getPaketList($db);
 $billingList = getBillingList($db);
 
+// Data terbaru user hanya berasal dari file yang memuat billing izinnya.
+$latestUploadAccessCondition = authIsAdmin()
+    ? '1=1'
+    : 'EXISTS (SELECT 1 FROM rekap access_rekap
+        INNER JOIN prefix_customers access_customer ON access_customer.prefix = access_rekap.prefix
+        WHERE access_rekap.file_id = f.id AND '.authBillingCondition('access_customer.billing_id', $db).')';
+
 $latestFileId = null;
 $latestUploadMetadata = ['periode' => '', 'tanggal' => ''];
 $requestedUploadId = max(0, (int)($_GET['upload_id'] ?? 0));
 if ($requestedUploadId > 0) {
-    $stmt = $db->prepare("SELECT id, periode, tanggal FROM uploaded_files WHERE id = ? LIMIT 1");
+    $stmt = $db->prepare("SELECT f.id, f.periode, f.tanggal FROM uploaded_files f
+        WHERE f.id = ? AND {$latestUploadAccessCondition} LIMIT 1");
     $stmt->bind_param('i', $requestedUploadId);
     $stmt->execute();
     $selectedUpload = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 } else {
-    $res = $db->query("SELECT id, periode, tanggal FROM uploaded_files ORDER BY id DESC LIMIT 1");
+    $res = $db->query("SELECT f.id, f.periode, f.tanggal FROM uploaded_files f
+        WHERE {$latestUploadAccessCondition} ORDER BY f.id DESC LIMIT 1");
     $selectedUpload = $res ? $res->fetch_assoc() : null;
 }
 if ($selectedUpload) {
@@ -48,74 +58,45 @@ if ($selectedUpload) {
     ];
 }
 
-$rekapData = []; $allPaket = $paketList; $customerNames = []; $awalanSubset = [];
+$rekapData = []; $allPaket = $paketList; $customerNames = []; $prefixSubset = [];
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $totalPages = 1;
-$totalAwalan = 0;
+$totalPrefix = 0;
 $mainBillingCondition = authIsAdmin() ? '1=1' : authBillingCondition('c.billing_id', $db);
 
 if ($latestFileId) {
-    $totalAwalan = $db->query("SELECT COUNT(DISTINCT r.awalan) AS cnt
+    $totalPrefix = $db->query("SELECT COUNT(DISTINCT r.prefix) AS cnt
         FROM rekap r
-        LEFT JOIN prefix_customers c ON c.awalan = r.awalan
+        LEFT JOIN prefix_customers c ON c.prefix = r.prefix
         WHERE r.file_id = {$latestFileId} AND {$mainBillingCondition}")->fetch_assoc()['cnt'];
-    $totalPages = max(1, (int)ceil($totalAwalan / PER_PAGE));
+    $totalPages = max(1, (int)ceil($totalPrefix / PER_PAGE));
     $page = min($page, $totalPages);
     $offset = ($page - 1) * PER_PAGE;
 
-    $res = $db->query("SELECT daftar.awalan,
+    $res = $db->query("SELECT daftar.prefix,
             COALESCE(NULLIF(TRIM(c.nama_pelanggan), ''), 'N/A') AS nama
-        FROM (SELECT DISTINCT awalan FROM rekap WHERE file_id = {$latestFileId}) daftar
-        LEFT JOIN prefix_customers c ON c.awalan = daftar.awalan
+        FROM (SELECT DISTINCT prefix FROM rekap WHERE file_id = {$latestFileId}) daftar
+        LEFT JOIN prefix_customers c ON c.prefix = daftar.prefix
         WHERE {$mainBillingCondition}
-        ORDER BY nama ASC, daftar.awalan ASC
+        ORDER BY nama ASC, daftar.prefix ASC
         LIMIT {$offset}, ".PER_PAGE);
     while ($r = $res->fetch_assoc()) {
-        $awalanSubset[] = $r['awalan'];
-        $customerNames[$r['awalan']] = $r['nama'];
+        $prefixSubset[] = $r['prefix'];
+        $customerNames[$r['prefix']] = $r['nama'];
     }
 
-    if (!empty($awalanSubset)) {
-        $in = "'" . implode("','", array_map([$db, 'real_escape_string'], $awalanSubset)) . "'";
-        $res = $db->query("SELECT awalan, paket, jumlah FROM rekap WHERE file_id = {$latestFileId} AND awalan IN ({$in}) ORDER BY awalan, paket");
+    if (!empty($prefixSubset)) {
+        $in = "'" . implode("','", array_map([$db, 'real_escape_string'], $prefixSubset)) . "'";
+        $res = $db->query("SELECT prefix, paket, jumlah FROM rekap WHERE file_id = {$latestFileId} AND prefix IN ({$in}) ORDER BY prefix, paket");
         while ($r = $res->fetch_assoc()) {
-            $rekapData[$r['awalan']][$r['paket']] = (int)$r['jumlah'];
+            $rekapData[$r['prefix']][$r['paket']] = (int)$r['jumlah'];
         }
     }
 }
 
-$allFiles = [];
-$res = $db->query("SELECT f.id, f.saved_name, f.total_rows, f.periode, f.tanggal, f.uploaded_at,
-        COALESCE(NULLIF(TRIM(u.full_name), ''), u.username, 'Tidak diketahui') AS uploaded_by
-    FROM uploaded_files f
-    LEFT JOIN users u ON u.id = f.uploaded_by_user_id
-    ORDER BY f.uploaded_at DESC, f.id DESC");
-while ($f = $res->fetch_assoc()) $allFiles[] = $f;
-$filesByDate = groupRowsByDate($allFiles, 'tanggal');
-[$pagedFilesByDate, $archivePage, $archiveTotalPages] = paginateDateGroups($filesByDate, (int)($_GET['archive_page'] ?? 1));
 $totalPelanggan = 0;
 $res = $db->query("SELECT COUNT(*) AS total FROM prefix_customers c WHERE ".(authIsAdmin() ? '1=1' : authBillingCondition('c.billing_id', $db)));
 if ($res && $row = $res->fetch_assoc()) $totalPelanggan = (int)$row['total'];
-$generatedDocs = [];
-$documentWhere = authIsAdmin()
-    ? '1=1'
-    : '('.authBillingCondition('d.billing_id', $db).' OR (d.billing_id IS NULL AND d.generated_by_user_id = '.authUserId().'))';
-$res = $db->query("SELECT d.id, d.document_type, d.original_name, d.file_size, d.billing_id,
-        f.periode, f.tanggal, d.created_at,
-        COALESCE(b.nama, 'Semua billing') AS billing,
-        COALESCE(NULLIF(TRIM(u.full_name), ''), u.username, 'Tidak diketahui') AS generated_by
-    FROM generated_documents d
-    INNER JOIN uploaded_files f ON f.id = d.file_id
-    LEFT JOIN billing_master b ON b.id = d.billing_id
-    LEFT JOIN users u ON u.id = d.generated_by_user_id
-    WHERE {$documentWhere}
-    ORDER BY d.created_at DESC, d.id DESC");
-while ($res && $row = $res->fetch_assoc()) $generatedDocs[] = $row;
-$documentsByDate = groupRowsByDate($generatedDocs, 'created_at');
-[$pagedDocumentsByDate, $documentPage, $documentTotalPages] = paginateDateGroups($documentsByDate, (int)($_GET['document_page'] ?? 1));
-$totalDocuments = 0;
-$res = $db->query("SELECT COUNT(*) AS total FROM generated_documents d WHERE {$documentWhere}");
-if ($res && $row = $res->fetch_assoc()) $totalDocuments = (int)$row['total'];
 $databaseBytes = 0;
 $stmt = $db->prepare("SELECT COALESCE(SUM(data_length + index_length), 0) AS total_bytes
     FROM information_schema.tables WHERE table_schema = ?");
@@ -125,7 +106,7 @@ $stmt->execute();
 $databaseSizeRow = $stmt->get_result()->fetch_assoc();
 if ($databaseSizeRow) $databaseBytes = (int)$databaseSizeRow['total_bytes'];
 $stmt->close();
-$databaseSize = formatBytes($databaseBytes);
+$databaseSize = $databaseBytes < 1048576 ? '0' : formatBytes($databaseBytes);
 $db->close();
 ?>
 
@@ -139,7 +120,7 @@ $db->close();
     <link rel="stylesheet" href="assets/vendor/poppins/poppins.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/main-style.css">
+    <link rel="stylesheet" href="assets/css/main-style.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/main-style.css') ?>">
     <link rel="icon" type="image/ico" href="assets/favicon.ico">
 </head>
 <body>
@@ -157,17 +138,17 @@ $db->close();
             <button type="button" class="mini-stat mini-stat-action" data-bs-toggle="modal" data-bs-target="#customerModal" title="Tambah pelanggan baru">
                 <span>Client</span><strong><i class="fas fa-user-plus me-1"></i>Add</strong>
             </button>
+
+           <a href="pelanggan.php" class="mini-stat mini-stat-action" title="Buka halaman pelanggan">
+                <span>Pelanggan</span><strong><i class="fas fa-user me-1"></i><?= $totalPelanggan ?></strong>
+            </a>
             <div class="mini-stat" title="Total data dan indeks seluruh tabel database">
-                <span>Disk Database</span><strong><?= htmlspecialchars($databaseSize) ?></strong>
+                <span>Disk Database</span><strong><i class="fas fa-database me-1"></i><?= htmlspecialchars($databaseSize) ?></strong>
             </div>
-            <div class="mini-stat"><span>Paket</span><strong><?= count($paketList) ?></strong></div>
-            <button type="button" class="mini-stat" data-bs-toggle="modal" data-bs-target="#listCustomerModal" title="Buka direktori pelanggan">
-                <span>Pelanggan</span><strong><?= $totalPelanggan ?></strong>
+
+            <button type="button" class="mini-stat mini-stat-action" data-bs-toggle="modal" data-bs-target="#packageModal" title="Kelola paket">
+                <span>Paket</span><strong><i class="fas fa-ticket me-1"></i><span id="packageTotal" class="d-inline"><?= count($paketList) ?></span></strong>
             </button>
-            <div class="mini-stat">
-                <span>Dokumen</span><strong id="documentTotal"><?= $totalDocuments ?></strong>
-            </div>
-            <div class="mini-stat"><span>Arsip</span><strong><?= count($allFiles) ?></strong></div>
         </div>
     </section>
 
@@ -185,26 +166,27 @@ $db->close();
                 <div class="row g-3 align-items-end">
                     <div class="col-12 col-md-3">
                         <label for="uploadPeriode" class="form-label">Periode</label>
-                        <input type="text" name="periode" id="uploadPeriode" class="form-control" maxlength="100" required placeholder="Contoh: Agustus 2026">
+                        <input type="text" name="periode" id="uploadPeriode" class="form-control" maxlength="20" required placeholder="01 s/d 15 Agustus">
                     </div>
                     <div class="col-12 col-md-3">
                         <label for="uploadTanggal" class="form-label">Tanggal</label>
                         <input type="date" name="tanggal" id="uploadTanggal" class="form-control" required value="<?= date('Y-m-d') ?>">
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-6">
                         <label class="form-label">File voucher</label>
-                        <div class="file-picker">
+                        <div class="auto-upload-control">
                             <input class="visually-hidden" type="file" name="excelfile" id="ef" accept=".xlsx,.xls,.ods,.csv" required>
-                            <label class="file-picker-button" for="ef"><i class="fas fa-folder-open"></i>Pilih File</label>
-                            <span class="file-picker-name" id="selectedFileName">Tidak ada file yang dipilih</span>
+                            <label class="btn btn-primary auto-upload-button" for="ef" id="uploadPickerButton">
+                                <i class="fas fa-cloud-arrow-up"></i>
+                                <span id="uploadPickerLabel">Pilih File &amp;</span>
+                            </label>
+                            <span class="visually-hidden" id="selectedFileName">Tidak ada file yang dipilih</span>
                         </div>
                     </div>
-                    <div class="col-12 col-md-2">
-                        <button type="submit" class="btn btn-primary w-100" id="uploadBtn"><i class="fas fa-upload"></i> Upload & Proses</button>
-                    </div>
                 </div>
+                <button type="submit" class="visually-hidden" id="uploadBtn" tabindex="-1">Proses...</button>
                 <div class="progress mt-3 d-none" id="progressWrap">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressFill" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="width:0%">0%</div>
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressFill" role="progressbar" aria-valuemin="0" aria-valuemax="100" ariavaluenow="0" style="width:0%">0%</div>
                 </div>
                 <div class="text-muted mt-1 d-none" id="progressStatus">Menyiapkan upload...</div>
             </form>
@@ -213,20 +195,15 @@ $db->close();
     </div>
 
     <?php if (!empty($rekapData)): ?>
-    <div class="card premium-card mb-4 report-card" id="quickActions">
-        <div class="card-body">
-            <div class="section-heading">
-                <span class="section-icon"><i class="fas fa-file-export"></i></span>
-                <div>
-                    <h2>Aksi Data Terbaru</h2>
-                    <p>Download atau lihat dokumen dari data yang baru diunggah.</p>
-                </div>
-            </div>
-            <div class="metadata-note p-3 mb-3">
-                <i class="fas fa-lightbulb me-1"></i>
-                Periode dan tanggal mengikuti metadata yang ditentukan saat file diunggah agar semua dokumen konsisten.
-            </div>
-            <form method="get" id="metadataDownloadForm" class="row g-3 align-items-end">
+
+    <section class="report-card latest-data-card mb-4">
+    <div class="latest-data-heading">
+        <div class="d-flex align-items-center latest-data-title">
+            <i class="fas fa-table-list" aria-hidden="true"></i>
+            <h4>Data terbaru</h4>
+        </div>
+    </div>
+    <form method="get" id="metadataDownloadForm" class="latest-data-actions row g-3 align-items-end">
                 <input type="hidden" name="action" id="metadataAction" value="export_rekap">
                 <input type="hidden" name="view" id="metadataView" value="1" disabled>
                 <input type="hidden" name="file_id" value="<?= $latestFileId ?>">
@@ -240,7 +217,8 @@ $db->close();
                         <input type="hidden" name="billing_id" id="reportBilling" value="">
                         <div class="dropdown">
                             <button type="button" class="btn btn-outline-secondary dropdown-toggle report-billing-toggle"
-                                id="reportBillingButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                id="reportBillingButton" data-bs-toggle="dropdown" data-bs-boundary="viewport"
+                                data-bs-offset="0,6" aria-expanded="false">
                                 <i class="fas fa-building me-1"></i>
                                 <span id="reportBillingLabel">Semua Billing</span>
                             </button>
@@ -271,14 +249,6 @@ $db->close();
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <ul class="nav nav-pills app-tabs">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#rekap"><i class="fas fa-table-list me-1"></i> Rekap</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#arsip"><i class="fas fa-box-archive me-1"></i> Arsip</button></li>
-        <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#dokumen"><i class="fas fa-folder-open me-1"></i> Dokumen <span class="badge rounded-pill text-bg-light ms-1"><?= $totalDocuments ?></span></button></li>
-    </ul>
 
     <div class="tab-content data-panel">
         <div class="tab-pane fade show active" id="rekap">
@@ -291,10 +261,10 @@ $db->close();
                 <table class="table table-hover">
                     <thead><tr><th>Nama</th><th>Prefix</th><?php foreach ($allPaket as $p): ?><th><?= htmlspecialchars($p) ?></th><?php endforeach; ?></tr></thead>
                     <tbody>
-                    <?php foreach ($awalanSubset as $awalan): $pakets = $rekapData[$awalan] ?? []; ?>
-                        <tr data-search-name="<?= htmlspecialchars(mb_strtolower($customerNames[$awalan] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?>">
-                            <td><?= htmlspecialchars($customerNames[$awalan] ?? 'N/A') ?></td>
-                            <td class="awalan"><?= htmlspecialchars($awalan) ?></td>
+                    <?php foreach ($prefixSubset as $prefix): $pakets = $rekapData[$prefix] ?? []; ?>
+                        <tr data-search-name="<?= htmlspecialchars(mb_strtolower($customerNames[$prefix] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?>">
+                            <td><?= htmlspecialchars($customerNames[$prefix] ?? 'N/A') ?></td>
+                            <td class="prefix"><?= htmlspecialchars($prefix) ?></td>
                             <?php foreach ($allPaket as $p): $cnt = $pakets[$p] ?? 0; ?>
                                 <td><?= $cnt ?></td>
                             <?php endforeach; ?>
@@ -304,29 +274,30 @@ $db->close();
                 </table>
             </div>
             <div class="tab-search-empty d-none" id="rekapSearchEmpty"><i class="fas fa-magnifying-glass"></i> Nama pelanggan tidak ditemukan.</div>
-            <?php if ($totalAwalan > 0): ?>
+            <?php if ($totalPrefix > 0): ?>
             <nav class="date-pagination" id="rekapPagination" aria-label="Pagination rekap">
                 <div class="pagination-caption">Halaman <?= $page ?> dari <?= $totalPages ?></div>
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                        <?php if ($page > 1): ?><a class="page-link" href="?page=<?= $page - 1 ?>&amp;archive_page=<?= $archivePage ?>&amp;document_page=<?= $documentPage ?>#rekap" aria-label="Sebelumnya">&lsaquo;</a><?php else: ?><span class="page-link">&lsaquo;</span><?php endif; ?>
+                        <?php if ($page > 1): ?><a class="page-link" href="?page=<?= $page - 1 ?>#rekap" aria-label="Sebelumnya">&lsaquo;</a><?php else: ?><span class="page-link">&lsaquo;</span><?php endif; ?>
                     </li>
                     <?php foreach (paginationPageItems($page, $totalPages) as $paginationPage): ?>
                         <?php if ($paginationPage === null): ?>
                             <li class="page-item disabled"><span class="page-link">...</span></li>
                         <?php else: ?>
-                            <li class="page-item <?= $paginationPage === $page ? 'active' : '' ?>"><a class="page-link" href="?page=<?= $paginationPage ?>&amp;archive_page=<?= $archivePage ?>&amp;document_page=<?= $documentPage ?>#rekap" <?= $paginationPage === $page ? 'aria-current="page"' : '' ?>><?= $paginationPage ?></a></li>
+                            <li class="page-item <?= $paginationPage === $page ? 'active' : '' ?>"><a class="page-link" href="?page=<?= $paginationPage ?>#rekap" <?= $paginationPage === $page ? 'aria-current="page"' : '' ?>><?= $paginationPage ?></a></li>
                         <?php endif; ?>
                     <?php endforeach; ?>
                     <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                        <?php if ($page < $totalPages): ?><a class="page-link" href="?page=<?= $page + 1 ?>&amp;archive_page=<?= $archivePage ?>&amp;document_page=<?= $documentPage ?>#rekap" aria-label="Berikutnya">&rsaquo;</a><?php else: ?><span class="page-link">&rsaquo;</span><?php endif; ?>
+                        <?php if ($page < $totalPages): ?><a class="page-link" href="?page=<?= $page + 1 ?>#rekap" aria-label="Berikutnya">&rsaquo;</a><?php else: ?><span class="page-link">&rsaquo;</span><?php endif; ?>
                     </li>
                 </ul>
             </nav>
             <?php endif; ?>
         </div>
+        <?php if (false): // Tampilan arsip dan dokumen telah dipindahkan ke files.php. ?>
         <div class="tab-pane fade" id="arsip">
-            <?php if (empty($filesByDate)): ?>
+            <?php if (empty($pagedFilesByDate)): ?>
                 <div class="text-center text-muted py-5">Belum ada rekap upload.</div>
             <?php else: ?>
                 <div class="tab-search">
@@ -359,7 +330,6 @@ $db->close();
                                                     <span><i class="fas fa-list-ol"></i><?= (int)$file['total_rows'] ?> baris</span>
                                                     <span><i class="fas fa-calendar"></i><?= htmlspecialchars($file['periode'] ?: 'Tanpa periode') ?></span>
                                                     <span><i class="fas fa-user"></i><?= htmlspecialchars($file['uploaded_by']) ?></span>
-                                                    <span><i class="fas fa-clock"></i><?= htmlspecialchars(date('H:i', strtotime($file['uploaded_at']))) ?></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -400,7 +370,7 @@ $db->close();
         </div>
 
         <div class="tab-pane fade" id="dokumen">
-            <?php if (empty($documentsByDate)): ?>
+            <?php if (empty($pagedDocumentsByDate)): ?>
                 <div class="text-center text-muted py-5">Belum ada dokumen tersimpan.</div>
             <?php else: ?>
                 <div class="tab-search">
@@ -417,7 +387,6 @@ $db->close();
                         <h2 class="accordion-header">
                             <button class="accordion-button <?= $documentOpen ? '' : 'collapsed' ?>" type="button" data-bs-toggle="collapse" data-bs-target="#<?= $documentCollapseId ?>" aria-expanded="<?= $documentOpen ? 'true' : 'false' ?>" aria-controls="<?= $documentCollapseId ?>">
                                 <span class="date-title"><i class="fas fa-calendar-day me-2"></i><?= htmlspecialchars(formatDateGroup($dateKey)) ?></span>
-                                <span class="badge rounded-pill text-bg-primary ms-2"><?= count($dateDocuments) ?> dokumen</span>
                             </button>
                         </h2>
                         <div id="<?= $documentCollapseId ?>" class="accordion-collapse collapse <?= $documentOpen ? 'show' : '' ?>" data-bs-parent="#documentDateAccordion">
@@ -435,7 +404,6 @@ $db->close();
                                                     <span><i class="fas fa-calendar-check"></i><?= htmlspecialchars($doc['tanggal'] ?: 'Tanpa tanggal') ?></span>
                                                     <span><i class="fas fa-database"></i><?= number_format($doc['file_size'] / 1024, 1, ',', '.') ?> KB</span>
                                                     <span><i class="fas fa-user"></i><?= htmlspecialchars($doc['generated_by']) ?></span>
-                                                    <span><i class="fas fa-clock"></i><?= htmlspecialchars(date('H:i', strtotime($doc['created_at']))) ?></span>
                                                 </div>
                                             </div>
                                         </div>
@@ -476,7 +444,9 @@ $db->close();
                 </nav>
             <?php endif; ?>
         </div>
+        <?php endif; // Arsip dan dokumen tersedia di files.php. ?>
     </div>
+    </section>
     <?php else: ?>
         <div class="empty-state">
             <div class="empty-state-icon"><i class="fas fa-inbox"></i></div>
@@ -484,6 +454,7 @@ $db->close();
             <p class="mb-0">Unggah file Excel di atas untuk mulai membuat rekap dan invoice.</p>
         </div>
     <?php endif; ?>
+
 </div>
 
 <!-- Modal Tambah/Edit Pelanggan -->
@@ -502,8 +473,8 @@ $db->close();
                     <input type="hidden" name="action" value="tambah_pelanggan">
                     <div class="row g-3 mb-3 customer-profile-fields">
                         <div class="col-md-4">
-                            <label class="form-label">Awalan *</label>
-                            <input type="text" name="awalan" class="form-control" maxlength="10" required id="custAwalan">
+                            <label class="form-label">Prefix *</label>
+                            <input type="text" name="prefix" class="form-control" maxlength="10" required id="custPrefix">
                         </div>
                         <div class="col-md-8">
                             <label class="form-label">Nama *</label>
@@ -565,6 +536,9 @@ $db->close();
                 </form>
             </div>
             <div class="modal-footer">
+                <?php if (authIsAdmin()): ?>
+                <button type="button" class="btn btn-danger d-none" id="deleteCustomerBtn"><i class="fas fa-trash"></i> Hapus</button>
+                <?php endif; ?>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 <button type="button" class="btn btn-primary" id="saveCustomerBtn"><i class="fas fa-save"></i> Simpan</button>
             </div>
@@ -572,24 +546,26 @@ $db->close();
     </div>
 </div>
 
-<!-- Modal Daftar Pelanggan -->
-<div class="modal fade" id="listCustomerModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable customer-list-dialog">
+<!-- Modal pengelolaan paket master. -->
+<div class="modal fade" id="packageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered modal-dialog-scrollable package-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="section-heading mb-0">
-                    <span class="section-icon"><i class="fas fa-address-book"></i></span>
-                    <div><h2>Direktori Pelanggan</h2><p>Detail alamat, telepon, billing, dan pengaturan pelanggan.</p></div>
+                    <span class="section-icon"><i class="fas fa-ticket"></i></span>
+                    <div><h2><?= authIsAdmin() ? 'Kelola Paket' : 'Daftar Paket' ?></h2><p><?= authIsAdmin() ? 'Tambahkan, ubah, atau hapus paket yang belum digunakan.' : 'Paket tersedia ditampilkan dalam mode hanya-baca.' ?></p></div>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
             </div>
             <div class="modal-body">
-                <div class="table-responsive">
-                    <table class="table table-hover" id="listCustomerTable">
-                        <thead><tr><th>Awalan</th><th>Nama</th><th>Alamat</th><th>Telepon</th><th>Billing</th><th class="customer-table-action">Aksi</th></tr></thead>
-                        <tbody></tbody>
-                    </table>
+                <?php if (authIsAdmin()): ?>
+                <div class="input-group package-create-form">
+                    <input type="text" class="form-control" id="packageModalName" maxlength="100" placeholder="Nama paket baru">
+                    <button type="button" class="btn btn-primary" id="packageModalAdd"><i class="fas fa-plus"></i> Tambah</button>
                 </div>
+                <?php endif; ?>
+                <div class="package-management-list" id="packageManagementList"></div>
+                <div class="empty-state d-none" id="packageManagementEmpty"><i class="fas fa-ticket-simple"></i> Belum ada paket.</div>
             </div>
         </div>
     </div>
@@ -608,12 +584,6 @@ $db->close();
 
 <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-const requestedTabHash = window.location.hash;
-if (['#rekap', '#arsip', '#dokumen'].includes(requestedTabHash)) {
-    const requestedTab = document.querySelector(`[data-bs-target="${requestedTabHash}"]`);
-    if (requestedTab) bootstrap.Tab.getOrCreateInstance(requestedTab).show();
-}
-
 function showToast(message, type = 'info', title = '') {
     const toastEl = document.getElementById('appToast');
     const icon = document.getElementById('toastIcon');
@@ -729,9 +699,7 @@ document.getElementById('downloadBundleBtn')?.addEventListener('click', async fu
         const zipBlob = await bundleResponse.blob();
         downloadBlob(zipBlob, getDownloadFilename(bundleResponse, 'Dokumen_Excel_PDF.zip'));
 
-        const totalEl = document.getElementById('documentTotal');
-        if (totalEl) totalEl.textContent = String((Number(totalEl.textContent) || 0) + 2);
-        showToast('ZIP berisi Excel dan PDF berhasil diunduh serta disimpan.', 'success');
+        showToast('ZIP berisi Excel dan PDF berhasil diunduh dan disimpan di halaman Files.', 'success');
         window.setTimeout(() => location.reload(), 1800);
     } catch (error) {
         showToast(error.message || 'Gagal membuat dokumen.', 'danger');
@@ -769,8 +737,6 @@ document.getElementById('viewExcelBtn')?.addEventListener('click', async functio
         if (!data.success || documentId < 1) throw new Error(data.message || 'File Excel gagal disimpan.');
 
         previewWindow.location.href = `index.php?action=view_excel&id=${encodeURIComponent(documentId)}`;
-        const totalEl = document.getElementById('documentTotal');
-        if (totalEl) totalEl.textContent = String((Number(totalEl.textContent) || 0) + 1);
         showToast('Excel untuk data unggahan ini berhasil dibuka.', 'success');
     } catch (error) {
         previewWindow.close();
@@ -790,13 +756,41 @@ function setUploadProgress(value, status) {
     document.getElementById('progressStatus').textContent = status;
 }
 
-document.getElementById('ef').addEventListener('change', function() {
+const uploadForm = document.getElementById('uploadForm');
+const uploadFileInput = document.getElementById('ef');
+const uploadPickerButton = document.getElementById('uploadPickerButton');
+const uploadPickerLabel = document.getElementById('uploadPickerLabel');
+
+function setUploadBusy(isBusy) {
+    document.getElementById('uploadBtn').disabled = isBusy;
+    uploadFileInput.disabled = isBusy;
+    uploadPickerButton.classList.toggle('disabled', isBusy);
+    uploadPickerButton.setAttribute('aria-disabled', isBusy ? 'true' : 'false');
+    uploadPickerLabel.textContent = isBusy ? 'Mengupload...' : 'Pilih File & Upload';
+}
+
+uploadPickerButton.addEventListener('click', event => {
+    const metadataFields = [
+        document.getElementById('uploadPeriode'),
+        document.getElementById('uploadTanggal')
+    ];
+    const invalidField = metadataFields.find(field => !field.checkValidity());
+    if (invalidField) {
+        event.preventDefault();
+        invalidField.reportValidity();
+        invalidField.focus();
+        showToast('Isi periode dan tanggal sebelum memilih file.', 'warning');
+    }
+});
+
+uploadFileInput.addEventListener('change', function() {
     document.getElementById('selectedFileName').textContent = this.files.length
         ? this.files[0].name
         : 'Tidak ada file yang dipilih';
+    if (this.files.length) uploadForm.requestSubmit(document.getElementById('uploadBtn'));
 });
 
-document.getElementById('uploadForm').addEventListener('submit', function(e) {
+uploadForm.addEventListener('submit', function(e) {
     e.preventDefault();
     if (!this.reportValidity()) return;
     const fileInput = document.getElementById('ef');
@@ -805,12 +799,11 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     const xhr = new XMLHttpRequest();
     const progressWrap = document.getElementById('progressWrap');
     const progressStatus = document.getElementById('progressStatus');
-    const uploadBtn = document.getElementById('uploadBtn');
     let processingTimer = null;
     let processingProgress = 70;
     progressWrap.classList.remove('d-none');
     progressStatus.classList.remove('d-none');
-    uploadBtn.disabled = true;
+    setUploadBusy(true);
     setUploadProgress(0, 'Menyiapkan upload...');
     xhr.upload.addEventListener('progress', e => {
         if (e.lengthComputable) {
@@ -829,7 +822,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     });
     xhr.addEventListener('load', () => {
         window.clearInterval(processingTimer);
-        uploadBtn.disabled = false;
+        setUploadBusy(false);
         try {
             const resp = JSON.parse(xhr.responseText);
             if (resp.success) {
@@ -853,7 +846,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     });
     xhr.addEventListener('error', () => {
         window.clearInterval(processingTimer);
-        uploadBtn.disabled = false;
+        setUploadBusy(false);
         progressWrap.classList.add('d-none');
         progressStatus.classList.add('d-none');
         showToast('Gagal mengirim file.', 'danger');
@@ -870,16 +863,23 @@ document.getElementById('saveCustomerBtn').addEventListener('click', () => {
     .then(r => r.json())
     .then(data => {
         showToast(data.message, data.success ? 'success' : 'danger');
-        if (data.success) setTimeout(() => location.reload(), 900);
+        if (data.success) {
+            const returnToCustomers = new URLSearchParams(window.location.search).has('edit_customer')
+                || new URLSearchParams(window.location.search).has('add_customer');
+            setTimeout(() => {
+                if (returnToCustomers) window.location.href = 'pelanggan.php';
+                else window.location.reload();
+            }, 900);
+        }
     })
     .catch(() => showToast('Gagal menyimpan pelanggan.', 'danger'));
 });
 
-function appendPaketHargaInput(paket) {
+function appendPaketHargaInput(paket, focusInput = true) {
     const existing = Array.from(document.querySelectorAll('.harga-input'))
         .find(input => input.dataset.paket === paket);
     if (existing) {
-        existing.focus();
+        if (focusInput) existing.focus();
         return;
     }
 
@@ -901,7 +901,7 @@ function appendPaketHargaInput(paket) {
     box.append(label, input);
     col.appendChild(box);
     document.getElementById('paketHargaContainer').appendChild(col);
-    input.focus();
+    if (focusInput) input.focus();
 }
 
 document.getElementById('addPaketBtn').addEventListener('click', () => {
@@ -930,42 +930,189 @@ document.getElementById('addPaketBtn').addEventListener('click', () => {
         .catch(error => showToast(error.message, 'danger'));
 });
 
+const packageModal = document.getElementById('packageModal');
+const packageList = document.getElementById('packageManagementList');
+const packageEmpty = document.getElementById('packageManagementEmpty');
+const canManagePackages = <?= authIsAdmin() ? 'true' : 'false' ?>;
+
+function sendPackageAction(action, values = {}) {
+    const formData = new FormData();
+    formData.append('action', action);
+    Object.entries(values).forEach(([key, value]) => formData.append(key, value));
+    return fetch('index.php', { method: 'POST', body: formData }).then(async response => {
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Permintaan paket gagal.');
+        return data;
+    });
+}
+
+function createPackageRow(packageData) {
+    const row = document.createElement('article');
+    row.className = 'package-management-row';
+
+    const information = document.createElement('div');
+    information.className = 'package-management-info';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control package-name-input';
+    input.maxLength = 100;
+    input.value = packageData.nama;
+    input.readOnly = true;
+    const meta = document.createElement('small');
+    meta.textContent = `${packageData.customer_count} pelanggan · ${packageData.usage_count} data rekap`;
+    information.append(input, meta);
+
+    row.append(information);
+    if (canManagePackages) {
+        const actions = document.createElement('div');
+        actions.className = 'package-management-actions';
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'btn btn-outline-primary';
+        editButton.innerHTML = '<i class="fas fa-pen"></i><span>Edit</span>';
+        editButton.addEventListener('click', () => {
+            if (input.readOnly) {
+                input.readOnly = false;
+                input.focus();
+                input.select();
+                editButton.innerHTML = '<i class="fas fa-check"></i><span>Simpan</span>';
+                return;
+            }
+
+            const newName = input.value.trim();
+            if (!newName) {
+                showToast('Nama paket wajib diisi.', 'warning');
+                input.focus();
+                return;
+            }
+            sendPackageAction('update_package', { package_id: packageData.id, nama_paket: newName })
+                .then(data => {
+                    showToast(data.message, 'success');
+                    window.setTimeout(() => window.location.reload(), 650);
+                })
+                .catch(error => showToast(error.message, 'danger'));
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'btn btn-outline-danger';
+        deleteButton.innerHTML = '<i class="fas fa-trash"></i><span>Hapus</span>';
+        deleteButton.title = packageData.usage_count > 0
+            ? 'Paket yang sudah digunakan tidak dapat dihapus'
+            : 'Hapus paket';
+        deleteButton.addEventListener('click', () => {
+            if (!window.confirm(`Hapus paket "${packageData.nama}"? Harga paket pelanggan juga akan dihapus.`)) return;
+            sendPackageAction('delete_package', { package_id: packageData.id })
+                .then(data => {
+                    showToast(data.message, 'success');
+                    loadPackages();
+                })
+                .catch(error => showToast(error.message, 'danger'));
+        });
+
+        actions.append(editButton, deleteButton);
+        row.append(actions);
+    }
+    return row;
+}
+
+function loadPackages() {
+    packageList.innerHTML = '<div class="text-center text-muted py-3">Memuat paket...</div>';
+    fetch('index.php?action=list_packages')
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || 'Daftar paket gagal dimuat.');
+            return data;
+        })
+        .then(data => {
+            packageList.replaceChildren(...data.packages.map(createPackageRow));
+            packageEmpty.classList.toggle('d-none', data.packages.length > 0);
+            document.getElementById('packageTotal').textContent = data.packages.length;
+        })
+        .catch(error => {
+            packageList.innerHTML = '';
+            showToast(error.message, 'danger');
+        });
+}
+
+packageModal.addEventListener('show.bs.modal', loadPackages);
+document.getElementById('packageModalAdd')?.addEventListener('click', () => {
+    const input = document.getElementById('packageModalName');
+    const name = input.value.trim();
+    if (!name) {
+        showToast('Masukkan nama paket baru.', 'warning');
+        input.focus();
+        return;
+    }
+    sendPackageAction('tambah_paket', { nama_paket: name })
+        .then(data => {
+            input.value = '';
+            appendPaketHargaInput(data.paket, false);
+            showToast(`Paket ${data.paket} berhasil ditambahkan.`, 'success');
+            loadPackages();
+        })
+        .catch(error => showToast(error.message, 'danger'));
+});
+
+document.getElementById('packageModalName')?.addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('packageModalAdd').click();
+    }
+});
+
 document.getElementById('customerModal').addEventListener('hidden.bs.modal', function() {
     document.getElementById('customerForm').reset();
     document.getElementById('modalTitle').textContent = 'Tambah Pelanggan';
-    document.getElementById('custAwalan').readOnly = false;
+    document.getElementById('custPrefix').readOnly = false;
+    this.classList.remove('is-editing');
+    document.getElementById('deleteCustomerBtn')?.classList.add('d-none');
     document.getElementById('billingModeExisting').checked = true;
     toggleBillingMode();
     document.querySelectorAll('.harga-input').forEach(inp => inp.value = '0');
 });
 
 const listModal = document.getElementById('listCustomerModal');
-listModal.addEventListener('show.bs.modal', () => {
-    fetch('index.php?action=list_customers')
-    .then(r => r.json())
-    .then(data => {
+const canDeleteCustomers = <?= authIsAdmin() ? 'true' : 'false' ?>;
+
+function loadCustomerList(page = 1) {
+    fetch(`index.php?action=list_customers&customer_page=${encodeURIComponent(page)}`)
+    .then(async response => {
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Daftar pelanggan gagal dimuat.');
+        return data;
+    })
+    .then(result => {
+        customerListPage = result.page;
+        customerListTotalPages = result.total_pages;
         const tbody = document.querySelector('#listCustomerTable tbody');
         tbody.innerHTML = '';
-        data.forEach(c => {
+        result.customers.forEach(c => {
+            const deleteAction = canDeleteCustomers
+                ? `<button class="btn btn-sm btn-outline-danger delete-cust customer-delete-button" type="button" data-prefix="${escapeHtml(c.prefix)}" data-name="${escapeHtml(c.nama_pelanggan)}" aria-label="Hapus pelanggan ${escapeHtml(c.nama_pelanggan)}"><i class="fas fa-trash"></i><span>Hapus</span></button>`
+                : '';
             tbody.innerHTML += `<tr>
-                <td>${escapeHtml(c.awalan)}</td>
+                <td>${escapeHtml(c.prefix)}</td>
                 <td>${escapeHtml(c.nama_pelanggan)}</td>
                 <td class="customer-address">${escapeHtml(c.alamat || 'N/A')}</td>
                 <td>${escapeHtml(c.telepon || 'N/A')}</td>
                 <td>${escapeHtml(c.billing || 'N/A')}</td>
-                                <td class="customer-table-action"><button class="btn btn-sm btn-warning edit-cust customer-edit-button" type="button" data-awalan="${escapeHtml(c.awalan)}" aria-label="Edit pelanggan ${escapeHtml(c.nama_pelanggan)}"><i class="fas fa-edit"></i><span>Edit</span></button></td>
+                <td class="customer-table-action"><div class="customer-row-actions"><button class="btn btn-sm btn-warning edit-cust customer-edit-button" type="button" data-prefix="${escapeHtml(c.prefix)}" aria-label="Edit pelanggan ${escapeHtml(c.nama_pelanggan)}"><i class="fas fa-edit"></i><span>Edit</span></button>${deleteAction}</div></td>
             </tr>`;
         });
         document.querySelectorAll('.edit-cust').forEach(btn => {
             btn.addEventListener('click', function() {
-                const awalan = this.dataset.awalan;
-                fetch(`index.php?action=get_customer&awalan=${encodeURIComponent(awalan)}`)
+                const prefix = this.dataset.prefix;
+                fetch(`index.php?action=get_customer&prefix=${encodeURIComponent(prefix)}`)
                 .then(r => r.json())
                 .then(cust => {
                     if (cust) {
                         document.getElementById('modalTitle').textContent = 'Edit Pelanggan';
-                        document.getElementById('custAwalan').value = cust.awalan;
-                        document.getElementById('custAwalan').readOnly = true;
+                        const customerModalElement = document.getElementById('customerModal');
+                        customerModalElement.classList.add('is-editing');
+                        document.getElementById('deleteCustomerBtn')?.classList.remove('d-none');
+                        document.getElementById('custPrefix').value = cust.prefix;
+                        document.getElementById('custPrefix').readOnly = true;
                         document.getElementById('custNama').value = cust.nama_pelanggan;
                         document.getElementById('custAlamat').value = cust.alamat||'';
                         document.getElementById('custTelepon').value = cust.telepon||'';
@@ -987,7 +1134,97 @@ listModal.addEventListener('show.bs.modal', () => {
                 });
             });
         });
-    });
+        document.querySelectorAll('.delete-cust').forEach(button => {
+            button.addEventListener('click', () => {
+                deleteCustomer(button.dataset.prefix || '', button.dataset.name || '');
+            });
+        });
+        document.getElementById('customerListCaption').textContent = `Halaman ${result.page} dari ${result.total_pages} · ${result.total} pelanggan`;
+        document.getElementById('customerListPrevious').disabled = result.page <= 1;
+        document.getElementById('customerListNext').disabled = result.page >= result.total_pages;
+    })
+    .catch(error => showToast(error.message, 'danger'));
+}
+
+listModal?.addEventListener('show.bs.modal', () => loadCustomerList(1));
+document.getElementById('customerListPrevious')?.addEventListener('click', () => {
+    if (customerListPage > 1) loadCustomerList(customerListPage - 1);
+});
+document.getElementById('customerListNext')?.addEventListener('click', () => {
+    if (customerListPage < customerListTotalPages) loadCustomerList(customerListPage + 1);
+});
+
+// Halaman pelanggan menggunakan tautan edit menuju editor yang sudah tersedia.
+function openCustomerEditor(prefix) {
+    fetch(`index.php?action=get_customer&prefix=${encodeURIComponent(prefix)}`)
+        .then(async response => {
+            const customer = await response.json();
+            if (!response.ok || !customer) throw new Error('Pelanggan tidak ditemukan atau tidak dapat diakses.');
+            return customer;
+        })
+        .then(cust => {
+            document.getElementById('modalTitle').textContent = 'Edit Pelanggan';
+            const customerModalElement = document.getElementById('customerModal');
+            customerModalElement.classList.add('is-editing');
+            document.getElementById('deleteCustomerBtn')?.classList.remove('d-none');
+            document.getElementById('custPrefix').value = cust.prefix;
+            document.getElementById('custPrefix').readOnly = true;
+            document.getElementById('custNama').value = cust.nama_pelanggan;
+            document.getElementById('custAlamat').value = cust.alamat || '';
+            document.getElementById('custTelepon').value = cust.telepon || '';
+            document.getElementById('billingModeExisting').checked = true;
+            document.getElementById('custBilling').value = cust.billing_id || '';
+            document.getElementById('custBillingNew').value = '';
+            toggleBillingMode();
+            document.querySelectorAll('.harga-input').forEach(input => input.value = '0');
+            Object.entries(cust.harga || {}).forEach(([packageName, price]) => {
+                const input = Array.from(document.querySelectorAll('.harga-input'))
+                    .find(item => item.dataset.paket === packageName);
+                if (input) input.value = price;
+            });
+            bootstrap.Modal.getOrCreateInstance(customerModalElement).show();
+        })
+        .catch(error => showToast(error.message, 'danger'));
+}
+
+const customerRoute = new URLSearchParams(window.location.search);
+if (customerRoute.has('add_customer')) {
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('customerModal')).show();
+} else if (customerRoute.get('edit_customer')) {
+    openCustomerEditor(customerRoute.get('edit_customer'));
+}
+
+function deleteCustomer(prefix, customerName) {
+    if (!prefix || !window.confirm(`Hapus pelanggan "${customerName}" (${prefix})? Akun customer, harga paket, dan invoice pelanggan akan dihapus.`)) return;
+
+    const formData = new FormData();
+    formData.append('action', 'delete_customer');
+    formData.append('prefix', prefix);
+    fetch('index.php', { method: 'POST', body: formData })
+        .then(async response => {
+            const data = await response.json();
+            if (!response.ok || !data.success) throw new Error(data.message || 'Pelanggan gagal dihapus.');
+            return data;
+        })
+        .then(data => {
+            bootstrap.Modal.getInstance(document.getElementById('customerModal'))?.hide();
+            showToast(data.message, 'success');
+            window.setTimeout(() => {
+                if (new URLSearchParams(window.location.search).has('edit_customer')) {
+                    window.location.href = 'pelanggan.php';
+                } else {
+                    window.location.reload();
+                }
+            }, 700);
+        })
+        .catch(error => showToast(error.message, 'danger'));
+}
+
+document.getElementById('deleteCustomerBtn')?.addEventListener('click', () => {
+    deleteCustomer(
+        document.getElementById('custPrefix').value.trim(),
+        document.getElementById('custNama').value.trim()
+    );
 });
 
 function setupRealtimeSearch(inputId, clearSelector, filterCallback) {
@@ -1019,33 +1256,8 @@ setupRealtimeSearch('rekapSearch', '.tab-search-clear', query => {
     document.getElementById('rekapPagination')?.classList.toggle('d-none', query !== '');
 });
 
-function filterDateAccordion(accordionId, emptyId, paginationId, query) {
-    const accordion = document.getElementById(accordionId);
-    if (!accordion) return;
-    const items = Array.from(accordion.querySelectorAll(':scope > .accordion-item[data-search-date]'));
-    let visible = 0;
-    items.forEach(item => {
-        const matches = !query || item.dataset.searchDate.includes(query);
-        item.classList.toggle('d-none', !matches);
-        if (matches) visible++;
-
-        const collapseElement = item.querySelector('.accordion-collapse');
-        const button = item.querySelector('.accordion-button');
-        if (!collapseElement || !button) return;
-        const collapse = bootstrap.Collapse.getOrCreateInstance(collapseElement, { toggle: false });
-        const shouldOpen = query ? matches : item.dataset.initialOpen === '1';
-        if (shouldOpen) collapse.show(); else collapse.hide();
-    });
-    document.getElementById(emptyId)?.classList.toggle('d-none', visible > 0);
-    document.getElementById(paginationId)?.classList.toggle('d-none', query !== '');
-}
-
-setupRealtimeSearch('archiveSearch', '.tab-search-clear', query => {
-    filterDateAccordion('archiveDateAccordion', 'archiveSearchEmpty', 'archivePagination', query);
-});
-setupRealtimeSearch('documentSearch', '.tab-search-clear', query => {
-    filterDateAccordion('documentDateAccordion', 'documentSearchEmpty', 'documentPagination', query);
-});
 </script>
+<script src="assets/js/mobile-keyboard.js"></script>
+<script src="assets/js/interaction-loading.js"></script>
 </body>
 </html>

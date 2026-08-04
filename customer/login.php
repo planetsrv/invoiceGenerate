@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Permintaan tidak valid. Muat ulang halaman dan coba kembali.';
     } else {
         $db = authDb();
-        $stmt = $db->prepare("SELECT id, customer_awalan, username, password, full_name, is_active
+        $stmt = $db->prepare("SELECT id, customer_prefix, username, password, full_name, is_active
             FROM customer_accounts WHERE username = ? LIMIT 1");
         $stmt->bind_param('s', $usernameWithPrefix);
         $stmt->execute();
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_regenerate_id(true);
             $_SESSION['customer_auth'] = [
                 'id' => (int)$account['id'],
-                'customer_awalan' => $account['customer_awalan'],
+                'customer_prefix' => $account['customer_prefix'],
                 'username' => $account['username'],
                 'full_name' => $account['full_name'],
             ];
@@ -59,8 +59,8 @@ $lockRemaining = loginThrottleState('customer')['remaining'];
     <link rel="stylesheet" href="../assets/vendor/poppins/poppins.css">
     <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/main-style.css">
-    <link rel="stylesheet" href="assets/customer-style.css">
+    <link rel="stylesheet" href="../assets/css/main-style.css?v=<?= (int) @filemtime(__DIR__ . '/../assets/css/main-style.css') ?>">
+    <link rel="stylesheet" href="assets/customer-style.css?v=<?= (int) @filemtime(__DIR__ . '/assets/customer-style.css') ?>">
     <link rel="icon" type="image/ico" href="../assets/favicon.ico">
 </head>
 <body class="customer-login-page">
@@ -144,12 +144,10 @@ $lockRemaining = loginThrottleState('customer')['remaining'];
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
-
-            <div class="customer-staff-login">
-                Bukan pelanggan? <a href="../login.php">Masuk ke area manajemen</a>
-            </div>
         </section>
     </main>
     <script src="../assets/js/login-lock.js"></script>
+    <script src="../assets/js/mobile-keyboard.js"></script>
+    <script src="../assets/js/interaction-loading.js"></script>
 </body>
 </html>

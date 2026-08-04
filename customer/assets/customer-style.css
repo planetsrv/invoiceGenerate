@@ -52,7 +52,7 @@ Client area
 
 .client-summary-card div span {
     color: #667085;
-    font-size: .72rem;
+    font-size: .9rem;
 }
 
 .client-summary-card div strong {
@@ -118,7 +118,7 @@ Client area
 .client-section-title p {
     margin: 0;
     color: #667085;
-    font-size: .7rem;
+    font-size: .8rem;
 }
 
 .client-profile-list {
@@ -141,7 +141,7 @@ Client area
 
 .client-profile-list dt {
     color: #667085;
-    font-size: .7rem;
+    font-size: .8rem;
     font-weight: 500;
 }
 
@@ -149,7 +149,7 @@ Client area
     min-width: 0;
     margin: 0;
     color: #344054;
-    font-size: .75rem;
+    font-size: .8rem;
     font-weight: 600;
     overflow-wrap: anywhere;
 }
@@ -631,7 +631,7 @@ Login dan navbar khusus customer
 }
 
 .customer-nav-user {
-    font-size: .7rem;
+    font-size: .8rem;
 }
 
 .customer-logout-button {
@@ -761,7 +761,7 @@ Login dan navbar khusus customer
     padding: .3rem .5rem;
     border-color: #a9cecc;
     background: #fff;
-    font-size: .7rem;
+    font-size: .8rem;
     line-height: 1.25;
     box-shadow: 0 0 0 .18rem rgba(23, 106, 109, .08);
 }
@@ -845,16 +845,26 @@ Login dan navbar khusus customer
         display: none;
     }
 
+    .customer-nav-user > i {
+        font-size: 1.15rem;
+    }
+
     .customer-logout-button span {
         display: none;
     }
 
     .customer-logout-button {
-        width: 34px;
-        height: 34px;
+        width: 32px;
+        min-width: 32px;
+        height: 32px;
+        min-height: 32px;
         justify-content: center;
         padding: 0;
-        border-radius: 10px;
+        border-radius: 9px;
+    }
+
+    .customer-logout-button i {
+        font-size: .72rem;
     }
 
     .customer-alert-actions {
@@ -882,5 +892,763 @@ Login dan navbar khusus customer
     .customer-inline-actions .btn {
         width: auto;
         min-height: 28px;
+    }
+}
+
+/* =========================================================
+Normalisasi akhir portal customer pada ponsel
+Mengikuti skala komponen aplikasi manajemen.
+========================================================= */
+@media (max-width: 575.98px) {
+    .customer-login-page,
+    .customer-area-page {
+        font-size: 12px;
+    }
+
+    .customer-navbar {
+        margin-bottom: .75rem;
+    }
+
+    .customer-navbar-inner {
+        min-height: 54px;
+        padding: .45rem .65rem;
+    }
+
+    .customer-brand {
+        gap: .5rem;
+    }
+
+    .customer-brand-mark {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+    }
+
+    .customer-brand > span:last-child {
+        font-size: 12px;
+    }
+
+    .customer-brand small {
+        font-size: 8px;
+    }
+
+    .customer-nav-actions {
+        gap: .35rem;
+    }
+
+    .customer-nav-user > i {
+        font-size: 16px;
+    }
+
+    .customer-logout-button {
+        width: 30px;
+        min-width: 30px;
+        height: 30px;
+        min-height: 30px;
+        border-radius: 8px;
+    }
+
+    .customer-login-shell {
+        width: calc(100% - 1.25rem);
+        border-radius: 18px;
+        transform: translateY(.65rem);
+    }
+
+    .customer-login-form-panel {
+        padding: 1.15rem;
+    }
+
+    .customer-login-mobile-brand {
+        margin-bottom: 1rem;
+    }
+
+    .customer-login-brand > span,
+    .customer-login-mobile-brand > span {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+    }
+
+    .customer-login-brand strong,
+    .customer-login-mobile-brand strong {
+        font-size: 13px;
+    }
+
+    .customer-form-eyebrow {
+        margin-bottom: .4rem;
+        font-size: 9px;
+    }
+
+    .customer-login-form-panel h2 {
+        margin-bottom: .3rem;
+        font-size: 18px;
+    }
+
+    .customer-login-description {
+        margin-bottom: 1rem;
+        font-size: 11px;
+    }
+
+    .customer-login-form {
+        gap: .75rem;
+    }
+
+    .customer-login-input .form-control,
+    .customer-inline-edit .form-control,
+    .customer-area-page .form-control,
+    .customer-area-page .form-select {
+        min-height: 36px;
+        height: 36px;
+        padding-top: .4rem;
+        padding-bottom: .4rem;
+        border-radius: 9px;
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    .customer-login-input .form-control {
+        padding-left: 2.35rem;
+    }
+
+    .customer-login-input .form-control::placeholder,
+    .customer-inline-edit .form-control::placeholder,
+    .customer-area-page .form-control::placeholder {
+        font-size: 11px;
+    }
+
+    .customer-login-input > i,
+    .customer-username-prefix {
+        left: .75rem;
+        font-size: 12px;
+    }
+
+    .customer-login-submit {
+        min-height: 36px;
+        padding: .4rem .7rem;
+        font-size: 11px;
+    }
+
+    .customer-login-alert,
+    .customer-profile-alert {
+        padding: .6rem;
+        border-radius: 9px;
+        font-size: 10px;
+    }
+
+    .client-page-container {
+        padding-right: .65rem;
+        padding-left: .65rem;
+    }
+
+    .client-heading {
+        margin-bottom: .7rem;
+    }
+
+    .client-summary-grid {
+        gap: .5rem;
+        margin-bottom: .65rem;
+    }
+
+    .client-summary-card {
+        gap: .65rem;
+        min-height: 58px;
+        padding: .65rem;
+        border-radius: 12px;
+    }
+
+    .client-summary-icon {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .client-summary-card div span {
+        font-size: 10px;
+    }
+
+    .client-summary-card div strong {
+        font-size: 12px;
+    }
+
+    .client-history-heading,
+    .client-profile-card .card-body {
+        padding: .75rem !important;
+    }
+
+    .client-section-title {
+        gap: .55rem;
+    }
+
+    .client-section-title > span {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        border-radius: 10px;
+    }
+
+    .client-section-title h2 {
+        font-size: 12px;
+    }
+
+    .client-section-title p,
+    .client-profile-list dt,
+    .client-profile-list dd {
+        font-size: 10px;
+    }
+
+    .client-profile-list {
+        margin-top: .75rem;
+    }
+
+    .client-profile-list > div {
+        gap: .15rem;
+        padding: .5rem 0;
+    }
+
+    .customer-profile-display {
+        gap: .4rem;
+    }
+
+    .customer-profile-edit-link {
+        font-size: 9px;
+    }
+
+    .customer-inline-edit textarea.form-control {
+        height: 58px;
+        min-height: 58px;
+        font-size: 12px;
+    }
+
+    .customer-inline-actions .btn,
+    .client-print-button {
+        min-height: 28px;
+        padding: .28rem .48rem;
+        font-size: 9px;
+    }
+
+    .client-invoice-item summary {
+        gap: .55rem;
+        padding: .65rem .75rem;
+    }
+
+    .client-invoice-date {
+        gap: .45rem;
+    }
+
+    .client-invoice-date strong,
+    .client-invoice-total {
+        font-size: 10px;
+    }
+
+    .client-invoice-date small,
+    .client-invoice-total i {
+        font-size: 8px;
+    }
+
+    .client-invoice-detail {
+        gap: .5rem;
+        padding: 0 .75rem .75rem;
+    }
+
+    .client-invoice-detail > div {
+        gap: .25rem;
+        padding: .6rem;
+        border-radius: 9px;
+    }
+
+    .client-invoice-detail span,
+    .client-invoice-detail strong,
+    .client-package-list li {
+        font-size: 9px;
+    }
+
+    .customer-invoice-pagination {
+        padding: .65rem .75rem;
+    }
+}
+
+/* ================================================================
+   KONTRAK UKURAN RESPONSIF PORTAL CUSTOMER
+   Menyamakan skala portal dengan aplikasi manajemen tanpa mengubah
+   karakter visual dan susunan informasi milik customer.
+   ================================================================ */
+.customer-area-page,
+.customer-login-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.customer-navbar-inner,
+.client-page-container,
+.customer-login-shell,
+.client-layout,
+.client-summary-grid,
+.client-profile-card,
+.client-history-card,
+.client-invoice-item {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.customer-navbar-inner {
+    width: min(100%, 1400px);
+    min-height: 64px;
+    padding: 10px clamp(16px, 2vw, 28px);
+}
+
+.customer-brand-mark {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    font-size: 17px;
+}
+
+.customer-brand-copy strong {
+    font-size: 14px;
+}
+
+.customer-brand-copy small,
+.customer-nav-user small {
+    font-size: 10px;
+}
+
+.customer-nav-user strong {
+    font-size: 12px;
+}
+
+.customer-logout-button {
+    min-height: 36px;
+    padding: 7px 11px;
+    border-radius: 9px;
+    font-size: 11px;
+}
+
+.client-page-container {
+    padding-right: clamp(16px, 2vw, 28px);
+    padding-left: clamp(16px, 2vw, 28px);
+}
+
+.client-heading .page-title,
+.customer-heading .page-title {
+    font-size: clamp(24px, 2vw, 32px);
+}
+
+.client-heading .page-description,
+.customer-heading .page-description {
+    font-size: 13px;
+}
+
+.client-summary-card,
+.client-profile-card,
+.client-history-card {
+    border-radius: 16px;
+}
+
+.client-summary-card {
+    min-height: 92px;
+    padding: 16px;
+}
+
+.client-summary-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    font-size: 15px;
+}
+
+.client-summary-card span,
+.client-summary-card small {
+    font-size: 11px;
+}
+
+.client-summary-card strong {
+    font-size: 14px;
+}
+
+.client-profile-card .card-body,
+.client-history-heading {
+    padding: 18px !important;
+}
+
+.client-section-title > span {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    border-radius: 11px;
+    font-size: 14px;
+}
+
+.client-section-title h2 {
+    font-size: 15px;
+}
+
+.client-section-title p,
+.client-profile-list dt,
+.client-profile-list dd {
+    font-size: 12px;
+}
+
+.customer-inline-edit .form-control {
+    min-height: 40px;
+    padding: 8px 11px;
+    border-radius: 9px;
+    font-size: 13px;
+}
+
+.customer-inline-edit .form-control::placeholder {
+    font-size: 12px;
+}
+
+.customer-inline-edit textarea.form-control {
+    min-height: 76px;
+}
+
+.customer-inline-actions .btn,
+.client-print-button {
+    min-height: 34px;
+    padding: 7px 10px;
+    border-radius: 9px;
+    font-size: 11px;
+}
+
+.client-invoice-item summary {
+    padding: 14px 16px;
+}
+
+.client-invoice-date strong,
+.client-invoice-total {
+    font-size: 12px;
+}
+
+.client-invoice-date small,
+.client-invoice-detail span,
+.client-package-list li {
+    font-size: 10.5px;
+}
+
+.client-invoice-detail strong {
+    font-size: 11px;
+}
+
+.customer-login-shell {
+    width: min(100%, 920px);
+    min-height: 560px;
+}
+
+.customer-login-form-panel {
+    padding: clamp(30px, 5vw, 58px);
+}
+
+.customer-login-input {
+    min-height: 42px;
+    border-radius: 10px;
+}
+
+.customer-login-input input {
+    min-height: 40px;
+    font-size: 14px;
+}
+
+.customer-login-input input::placeholder {
+    font-size: 13px;
+}
+
+.customer-login-submit {
+    min-height: 42px;
+    padding: 9px 13px;
+    border-radius: 10px;
+    font-size: 13px;
+}
+
+@media (max-width: 575.98px) {
+    .customer-area-page,
+    .customer-login-page {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .customer-navbar {
+        margin-bottom: 10px;
+    }
+
+    .customer-navbar-inner {
+        min-height: 54px;
+        padding: 7px 9px;
+    }
+
+    .customer-brand {
+        gap: 7px;
+        min-width: 0;
+    }
+
+    .customer-brand-mark {
+        width: 35px;
+        height: 35px;
+        flex-basis: 35px;
+        border-radius: 10px;
+        font-size: 16px;
+    }
+
+    .customer-brand-copy strong {
+        font-size: 11.5px;
+    }
+
+    .customer-brand-copy small,
+    .customer-nav-user {
+        font-size: 8px;
+    }
+
+    .customer-nav-actions {
+        gap: 6px;
+    }
+
+    .customer-logout-button {
+        min-width: 34px;
+        min-height: 32px;
+        padding: 5px 8px;
+        font-size: 9.5px;
+    }
+
+    .customer-logout-button i {
+        font-size: 10px;
+    }
+
+    .client-page-container {
+        padding-right: 7px;
+        padding-left: 7px;
+        padding-bottom: 24px !important;
+    }
+
+    .client-heading,
+    .customer-heading {
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .client-heading .page-title,
+    .customer-heading .page-title {
+        font-size: 20px;
+        line-height: 1.2;
+    }
+
+    .client-heading .page-description,
+    .customer-heading .page-description {
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .client-alert,
+    .customer-profile-alert {
+        gap: 7px;
+        padding: 9px 10px;
+        border-radius: 10px;
+        font-size: 10.5px;
+    }
+
+    .client-summary-grid {
+        gap: 7px;
+    }
+
+    .client-summary-card {
+        min-height: 62px;
+        gap: 9px;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .client-summary-icon {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        border-radius: 9px;
+        font-size: 12px;
+    }
+
+    .client-summary-card span,
+    .client-summary-card small {
+        font-size: 9px;
+    }
+
+    .client-summary-card strong,
+    .client-summary-card div strong {
+        font-size: 11px;
+    }
+
+    .client-layout {
+        gap: 9px;
+    }
+
+    .client-profile-card,
+    .client-history-card {
+        border-radius: 13px;
+    }
+
+    .client-profile-card .card-body,
+    .client-history-heading {
+        padding: 11px !important;
+    }
+
+    .client-section-title {
+        gap: 8px;
+    }
+
+    .client-section-title > span {
+        width: 35px;
+        height: 35px;
+        flex-basis: 35px;
+        border-radius: 9px;
+        font-size: 12px;
+    }
+
+    .client-section-title h2 {
+        font-size: 12px;
+    }
+
+    .client-section-title p,
+    .client-profile-list dt,
+    .client-profile-list dd {
+        font-size: 10px;
+    }
+
+    .client-profile-list > div {
+        padding: 8px 0;
+    }
+
+    .customer-profile-display {
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .customer-profile-edit-link {
+        flex: 0 0 auto;
+        font-size: 9px;
+    }
+
+    .customer-inline-edit .form-control {
+        min-height: 37px;
+        padding: 7px 9px;
+        border-radius: 8px;
+        font-size: 12.5px;
+    }
+
+    .customer-inline-edit .form-control::placeholder {
+        font-size: 11px;
+    }
+
+    .customer-inline-edit textarea.form-control {
+        min-height: 62px;
+        height: 62px;
+    }
+
+    .customer-inline-actions .btn,
+    .client-print-button {
+        min-height: 31px;
+        padding: 6px 8px;
+        border-radius: 8px;
+        font-size: 9.5px;
+    }
+
+    .client-invoice-item summary {
+        gap: 7px;
+        padding: 10px 11px;
+    }
+
+    .client-invoice-date strong,
+    .client-invoice-total {
+        font-size: 10.5px;
+    }
+
+    .client-invoice-date small,
+    .client-invoice-total i,
+    .client-invoice-detail span,
+    .client-package-list li {
+        font-size: 9px;
+    }
+
+    .client-invoice-detail {
+        gap: 7px;
+        padding: 0 11px 11px;
+    }
+
+    .client-invoice-detail > div {
+        padding: 9px;
+        border-radius: 9px;
+    }
+
+    .client-invoice-detail strong {
+        font-size: 9.5px;
+    }
+
+    .customer-invoice-pagination {
+        padding: 9px 11px;
+    }
+
+    /* Login customer menjadi kartu tunggal yang pas di viewport ponsel. */
+    .customer-login-page {
+        padding: 10px;
+    }
+
+    .customer-login-shell {
+        display: block;
+        width: 100%;
+        min-height: 0;
+        border-radius: 16px;
+    }
+
+    .customer-login-form-panel {
+        padding: 20px 16px;
+    }
+
+    .customer-login-mobile-brand {
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
+
+    .customer-form-eyebrow {
+        font-size: 9px;
+    }
+
+    .customer-login-title {
+        font-size: 20px;
+    }
+
+    .customer-login-description,
+    .customer-login-alert,
+    .customer-login-field label {
+        font-size: 10.5px;
+    }
+
+    .customer-login-form {
+        gap: 12px;
+    }
+
+    .customer-login-input {
+        min-height: 40px;
+        border-radius: 9px;
+    }
+
+    .customer-login-input input {
+        min-height: 38px;
+        font-size: 13px;
+    }
+
+    .customer-login-input input::placeholder {
+        font-size: 11.5px;
+    }
+
+    .customer-username-prefix {
+        font-size: 13px;
+    }
+
+    .customer-login-submit {
+        min-height: 40px;
+        padding: 8px 11px;
+        border-radius: 9px;
+        font-size: 12px;
     }
 }

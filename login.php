@@ -57,7 +57,7 @@ $lockRemaining = loginThrottleState('management')['remaining'];
     <link rel="stylesheet" href="assets/vendor/poppins/poppins.css">
     <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="assets/css/main-style.css">
+    <link rel="stylesheet" href="assets/css/main-style.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/main-style.css') ?>">
 </head>
 <body class="login-page">
     <main class="login-shell">
@@ -120,12 +120,11 @@ $lockRemaining = loginThrottleState('management')['remaining'];
                         <span>Masuk</span><i class="fas fa-arrow-right"></i>
                     </button>
                 </form>
-                <div class="login-customer-link">
-                    Anda pelanggan? <a href="customer/login.php">Masuk ke customer area</a>
-                </div>
             </section>
         </div>
     </main>
     <script src="assets/js/login-lock.js"></script>
+    <script src="assets/js/mobile-keyboard.js"></script>
+    <script src="assets/js/interaction-loading.js"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ require_once $autoloadPath;
 
 $db = authDb();
 $companySettings = getCompanySettings($db);
-$awalan = customerAuthAwalan();
+$prefix = customerAuthPrefix();
 $fileId = max(0, (int)($_GET['file_id'] ?? 0));
 
 if ($fileId > 0) {
@@ -21,23 +21,23 @@ if ($fileId > 0) {
             COALESCE(b.nama, '-') AS billing_name
         FROM invoices i
         INNER JOIN uploaded_files f ON f.id = i.file_id
-        INNER JOIN prefix_customers c ON c.awalan = i.awalan
+        INNER JOIN prefix_customers c ON c.prefix = i.prefix
         LEFT JOIN billing_master b ON b.id = c.billing_id
-        WHERE i.file_id = ? AND i.awalan = ?
+        WHERE i.file_id = ? AND i.prefix = ?
         LIMIT 1");
-    $stmt->bind_param('is', $fileId, $awalan);
+    $stmt->bind_param('is', $fileId, $prefix);
 } else {
     $stmt = $db->prepare("SELECT f.id AS file_id, f.uploaded_at, f.periode, f.tanggal,
             i.total_harga, c.nama_pelanggan, c.alamat, c.telepon,
             COALESCE(b.nama, '-') AS billing_name
         FROM invoices i
         INNER JOIN uploaded_files f ON f.id = i.file_id
-        INNER JOIN prefix_customers c ON c.awalan = i.awalan
+        INNER JOIN prefix_customers c ON c.prefix = i.prefix
         LEFT JOIN billing_master b ON b.id = c.billing_id
-        WHERE i.awalan = ?
+        WHERE i.prefix = ?
         ORDER BY f.uploaded_at DESC, f.id DESC
         LIMIT 1");
-    $stmt->bind_param('s', $awalan);
+    $stmt->bind_param('s', $prefix);
 }
 $stmt->execute();
 $invoice = $stmt->get_result()->fetch_assoc();
@@ -52,11 +52,11 @@ if (!$invoice) {
 $fileId = (int)$invoice['file_id'];
 $stmt = $db->prepare("SELECT r.paket, r.jumlah, COALESCE(h.harga, 0) AS harga
     FROM rekap r
-    LEFT JOIN customer_paket_harga h ON h.awalan = r.awalan AND h.paket = r.paket
+    LEFT JOIN customer_paket_harga h ON h.prefix = r.prefix AND h.paket = r.paket
     LEFT JOIN paket_master pm ON pm.nama = r.paket
-    WHERE r.file_id = ? AND r.awalan = ?
+    WHERE r.file_id = ? AND r.prefix = ?
     ORDER BY pm.id ASC, r.paket ASC");
-$stmt->bind_param('is', $fileId, $awalan);
+$stmt->bind_param('is', $fileId, $prefix);
 $stmt->execute();
 $result = $stmt->get_result();
 $items = '';
@@ -86,7 +86,7 @@ $period = trim((string)($invoice['periode'] ?? '')) ?: date('m/Y', $timestamp);
 $invoiceNumber = 'INV-'.date('Ym', $timestamp).str_pad((string)$fileId, 3, '0', STR_PAD_LEFT);
 $escape = static fn(mixed $value): string => htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
 $name = $escape($invoice['nama_pelanggan']);
-$prefix = $escape($awalan);
+$prefix = $escape($prefix);
 $address = nl2br($escape($invoice['alamat'] ?: '-'));
 $telephone = $escape($invoice['telepon'] ?: '-');
 $billingName = $escape($invoice['billing_name'] ?: '-');
@@ -97,7 +97,7 @@ $companyAddress = nl2br($escape($companySettings['address'] ?: '-'));
 $companyPhone = $escape($companySettings['phone']);
 $companyEmail = $escape($companySettings['email']);
 $companyWebsite = $escape($companySettings['website']);
-$contactName = $escape($companySettings['contact_name']);
+$companyCs = $escape($companySettings['contact_name']);
 $paymentInfo = nl2br($escape($companySettings['payment_info']));
 $invoiceNote = nl2br($escape($companySettings['invoice_note']));
 
@@ -116,15 +116,15 @@ if ($logoRoot !== false && $logoFile !== false
         $logoHtml = '<img class="company-logo" src="data:'.$mime.';base64,'.$logoData.'" alt="Logo">';
     }
 }
-if ($logoHtml === '') {
-    $logoHtml = '<div class="logo-placeholder">'.strtoupper(substr(strip_tags($companyName), 0, 2)).'</div>';
-}
+
 
 $companyContactLines = [];
-if ($companyPhone !== '') $companyContactLines[] = 'Tel: '.$companyPhone;
+$companyPhoneAndCs = [];
+if ($companyPhone !== '') $companyPhoneAndCs[] = 'Tlp: '.$companyPhone;
+if ($companyCs !== '') $companyPhoneAndCs[] = 'CS: '.$companyCs;
+if ($companyPhoneAndCs) $companyContactLines[] = implode('&nbsp;&nbsp;&nbsp;', $companyPhoneAndCs);
 if ($companyEmail !== '') $companyContactLines[] = 'Email: '.$companyEmail;
 if ($companyWebsite !== '') $companyContactLines[] = $companyWebsite;
-if ($contactName !== '') $companyContactLines[] = 'Kontak: '.$contactName;
 $companyContactHtml = $companyContactLines ? implode('<br>', $companyContactLines) : '-';
 $additionalInfoHtml = '';
 if ($paymentInfo !== '' || $invoiceNote !== '') {
@@ -185,7 +185,7 @@ $html = '<!doctype html>
 <div class="invoice-page">
     <div class="top-accent"></div>
     <table class="header-table"><tr>
-        <td class="brand-cell">'.$logoHtml.'<div class="company-name">'.$companyName.'</div><div class="company-address">'.$companyAddress.'</div></td>
+        <td class="brand-cell">'.$logoHtml.'<div class="company-address">'.$companyAddress.'</div></td>
         <td class="invoice-title-cell"><div class="invoice-title">INVOICE</div><div class="invoice-number">'.$escape($invoiceNumber).'</div><div class="company-contact">'.$companyContactHtml.'</div></td>
     </tr></table>
     <table class="invoice-summary"><tr>
@@ -195,8 +195,8 @@ $html = '<!doctype html>
         <td><div class="summary-label">STATUS</div><div class="summary-value">DITERBITKAN</div></td>
     </tr></table>
     <table class="customer-table"><tr>
-        <td><div class="customer-card"><div class="small-title">DITAGIHKAN KEPADA</div><div class="customer-name">'.$name.'</div><div class="detail-line">'.$address.'</div><div class="detail-line">Tel: '.$telephone.'</div></div></td>
-        <td><div class="customer-card right"><div class="small-title">INFORMASI PELANGGAN</div><div class="detail-line"><strong>Awalan:</strong> '.$prefix.'</div><div class="detail-line"><strong>Billing:</strong> '.$billingName.'</div><div class="detail-line"><strong>Periode layanan:</strong> '.$escape($period).'</div></div></td>
+        <td><div class="customer-card"><div class="small-title">DITAGIHKAN KEPADA</div><div class="customer-name">'.$name.'</div><div class="detail-line">'.$address.'</div><div class="detail-line">Tlp: '.$telephone.'</div></div></td>
+        <td><div class="customer-card right"><div class="small-title">INFORMASI PELANGGAN</div><div class="detail-line"><strong>Prefix:</strong> '.$prefix.'</div><div class="detail-line"><strong>Billing:</strong> '.$billingName.'</div><div class="detail-line"><strong>Periode layanan:</strong> '.$escape($period).'</div></div></td>
     </tr></table>
         <table class="items-table">
             <thead><tr><th>PAKET</th><th class="text-end">QTY</th><th class="text-end">HARGA</th><th class="text-end">SUBTOTAL</th></tr></thead>
@@ -214,5 +214,5 @@ $dompdf = new Dompdf\Dompdf($options);
 $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
-$dompdf->stream('Invoice_'.$awalan.'_'.$invoiceDate.'.pdf', ['Attachment' => false]);
+$dompdf->stream('Invoice_'.$prefix.'_'.$invoiceDate.'.pdf', ['Attachment' => false]);
 exit;

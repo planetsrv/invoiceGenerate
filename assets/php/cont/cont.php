@@ -2,9 +2,10 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('DB_NAME', 'voucher_db');
+define('DB_NAME', 'db_invGenerator');
 define('UPLOAD_DIR', __DIR__ . '/../../../files/uploads/');
 define('GENERATED_DIR', __DIR__ . '/../../../files/generated/');
+define('ZIP_DIR', __DIR__ . '/../../../files/zip/');
 define('PER_PAGE', 100);
 define('DATE_GROUPS_PER_PAGE', 50);
 define('EXCEL_HEADER_ROW', 5); //Baris header data

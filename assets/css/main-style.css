@@ -30,7 +30,7 @@ body {
     background: radial-gradient(circle at 8% 0%, rgba(91, 91, 214, .10), transparent 28rem), radial-gradient(circle at 95% 8%, rgba(200, 169, 107, .11), transparent 24rem), #f5f7fb;
     color: var(--ink);
     font-family: 'Poppins', sans-serif;
-    font-size: .9rem;
+    font-size: 1rem;
 }
 
 /* =========================================================
@@ -188,7 +188,7 @@ Layout halaman, heading, dan statistik
     display: block;
     margin-top: .15rem;
     color: var(--navy);
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 button.mini-stat {
@@ -210,10 +210,81 @@ button.mini-stat:focus-visible {
     outline-offset: 2px;
 }
 
+.mini-stat strong i {
+    color: var(--primary);
+}
+
+.mini-stat strong > span {
+    display: inline;
+    color: inherit;
+    font-size: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.mini-stat > span i {
+    margin-right: .25rem;
+}
+
 .mini-stat-action strong {
     color: var(--primary);
-    font-size: .8rem;
+    font-size: 1rem;
     white-space: nowrap;
+}
+
+/* Modal pengelolaan paket master. */
+.package-create-form {
+    margin-bottom: .85rem;
+}
+
+.package-management-list {
+    display: grid;
+    gap: .55rem;
+}
+
+.package-management-row {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .65rem;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #fafbfe;
+}
+
+.package-management-info {
+    display: grid;
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: .2rem;
+}
+
+.package-management-info small {
+    color: var(--muted);
+    font-size: .65rem;
+}
+
+.package-name-input[readonly] {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    font-weight: 600;
+}
+
+.package-management-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: .35rem;
+}
+
+.package-management-actions .btn {
+    min-height: 32px;
+    padding: .32rem .5rem;
+    font-size: .68rem;
+}
+
+#deleteCustomerBtn {
+    margin-right: auto;
 }
 
 /* =========================================================
@@ -261,7 +332,7 @@ Card dan heading setiap bagian
 .section-heading p {
     margin: .2rem 0 0;
     color: var(--muted);
-    font-size: .78rem;
+    font-size: .8rem;
 }
 
 /* =========================================================
@@ -292,54 +363,23 @@ Form, pemilih file, dan tombol
     font-size: .7rem;
 }
 
-.file-picker {
+.auto-upload-control {
     display: flex;
-    align-items: stretch;
-    width: 100%;
-    height: 45px;
-    overflow: hidden;
-    border: 1px solid #dfe4ec;
-    border-radius: 12px;
-    background: #fbfcfe;
-    transition: border-color .15s ease, box-shadow .15s ease;
+    justify-content: center;
 }
 
-.file-picker:focus-within {
-    border-color: rgba(91,91,214,.65);
-    background: #fff;
-    box-shadow: 0 0 0 .22rem rgba(91,91,214,.11);
-}
-
-.file-picker-button {
+.btn.auto-upload-button {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: .45rem;
-    flex: 0 0 auto;
+    width: auto;
+    min-width: 190px;
+    min-height: 40px;
     margin: 0;
-    padding: 0 .85rem;
-    color: #344054;
-    background: #f1f3f8;
-    border-right: 1px solid #dfe4ec;
-    font-size: .8rem;
-    font-weight: 600;
+    padding: .5rem 1rem;
+    font-size: .76rem;
     cursor: pointer;
-    transition: background-color .15s ease;
-}
-
-.file-picker-button:hover {
-    background: #e7eaf1;
-}
-
-.file-picker-name {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    padding: 0 .8rem;
-    color: var(--muted);
-    font-size: .8rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .btn {
@@ -387,6 +427,18 @@ Panel laporan, tab, dan pencarian
 }
 
 /* Toolbar billing dan aksi untuk dokumen terbaru. */
+.report-card {
+    position: relative;
+    z-index: 20;
+    overflow: visible;
+}
+
+.report-card .card-body,
+.report-billing-field,
+.report-billing-field .dropdown {
+    overflow: visible;
+}
+
 .report-action-toolbar {
     display: grid;
     grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(100px, 1fr));
@@ -422,13 +474,21 @@ Panel laporan, tab, dan pencarian
 }
 
 .report-billing-menu {
-    width: 100%;
+    z-index: 1080;
+    width: max(100%, 240px);
+    max-width: calc(100vw - 2rem);
     max-height: 240px;
     overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    box-shadow: 0 14px 35px rgba(15, 23, 42, .16);
 }
 
 .report-billing-menu .dropdown-item {
     font-size: .82rem;
+    overflow-wrap: anywhere;
+    white-space: normal;
 }
 
 .report-action-toolbar > .btn {
@@ -453,7 +513,7 @@ Panel laporan, tab, dan pencarian
 .app-tabs .nav-link {
     color: var(--muted);
     border-radius: 10px;
-    font-size: .8rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
@@ -482,7 +542,7 @@ Panel laporan, tab, dan pencarian
     padding: .5rem 2.5rem .5rem 2.35rem;
     border-radius: 11px;
     background: #f8f9fc;
-    font-size: .8rem;
+    font-size: 1rem;
 }
 
 .tab-search-icon {
@@ -642,7 +702,7 @@ Elemen data, progress, toast, dan modal
     word-break: break-word;
 }
 
-.awalan {
+.prefix {
     color: var(--primary);
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
@@ -723,7 +783,15 @@ Elemen data, progress, toast, dan modal
     text-align: center;
 }
 
-.customer-edit-button {
+.customer-row-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+}
+
+.customer-edit-button,
+.customer-delete-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -962,7 +1030,7 @@ body {
 }
 
 .section-heading p {
-    font-size: clamp(.74rem, 1.45vw, .82rem);
+    font-size: clamp(.8rem, 1.45vw, .82rem);
 }
 
 .accordion-button {
@@ -1036,20 +1104,20 @@ Responsif: ponsel dan tablet kecil
     }
 
     .mini-stat span {
-        font-size: .52rem;
+        font-size: .8rem;
         letter-spacing: .045em;
     }
 
     .mini-stat strong {
-        font-size: .86rem;
+        font-size: .8rem;
     }
 
     .mini-stat-action strong {
-        font-size: .65rem;
+        font-size: .8rem;
     }
 
     .mini-stat i {
-        font-size: .72rem;
+        font-size: .77rem;
     }
 
     .card-body {
@@ -1094,6 +1162,17 @@ Responsif: ponsel dan tablet kecil
 
     .report-action-toolbar .report-billing-toggle i {
         font-size: .68rem;
+    }
+
+    .report-billing-menu {
+        width: max(100%, 220px);
+        max-width: calc(100vw - 1.5rem);
+    }
+
+    .report-billing-menu .dropdown-item {
+        padding: .5rem .65rem;
+        font-size: .68rem;
+        line-height: 1.35;
     }
 
     .table {
@@ -1159,7 +1238,7 @@ Responsif: ponsel dan tablet kecil
     }
 
     .eyebrow {
-        font-size: .62rem;
+        font-size: .8rem;
     }
 
     .section-heading {
@@ -1206,12 +1285,12 @@ Responsif: ponsel dan tablet kecil
     }
 
     .accordion-button .badge {
-        font-size: .65rem;
+        font-size: .7rem;
         white-space: nowrap;
     }
 
     .accordion-body {
-        padding: .75rem;
+        padding: .8rem;
     }
 
     .file-entry {
@@ -1281,7 +1360,7 @@ Responsif: ponsel dan tablet kecil
     }
 
     .modal-title {
-        font-size: 1rem;
+        font-size: 1.2rem;
     }
 
     .modal-body, .modal-footer {
@@ -1312,18 +1391,160 @@ Responsif: ponsel dan tablet kecil
 
 }
 
+/* Halaman Files dan judul data terbaru pada dashboard. */
+.latest-data-heading,
+.files-summary {
+    display: flex;
+    align-items: center;
+}
+
+.latest-data-heading {
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: .5rem;
+    padding: .75rem 1rem;
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 14px 14px 0 0;
+    background: #fff;
+}
+
+.latest-data-heading > div {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    color: var(--ink);
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.latest-data-heading > div i {
+    color: var(--primary);
+    flex: 0 0 auto;
+    font-size: .82rem;
+    line-height: 1;
+}
+
+.latest-data-title h4 {
+    margin: 0;
+    font-size: .82rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.latest-data-heading + .data-panel {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.files-summary {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .55rem;
+}
+
+.files-summary span {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .5rem .65rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--muted);
+    font-size: .67rem;
+}
+
+.files-summary i {
+    color: var(--primary);
+}
+
+.files-summary strong {
+    color: var(--ink);
+    font-size: .76rem;
+}
+
+.files-tabs .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+.files-data-panel {
+    min-height: 220px;
+}
+
+@media (max-width: 767.98px) {
+    .latest-data-heading {
+        padding: .6rem .7rem;
+    }
+
+    .latest-data-heading > div,
+    .latest-data-heading .btn {
+        font-size: .68rem;
+    }
+
+    .latest-data-heading > div i {
+        font-size: .7rem;
+    }
+
+    .latest-data-title h4 {
+        font-size: .72rem;
+    }
+
+    .files-summary {
+        justify-content: flex-start;
+    }
+
+    .files-summary span {
+        padding: .4rem .5rem;
+        font-size: .6rem;
+    }
+
+    .files-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .files-tabs .nav-link {
+        justify-content: center;
+        width: 100%;
+        min-height: 38px;
+        padding: .45rem .35rem;
+        font-size: .62rem;
+        line-height: 1.2;
+    }
+}
+
 /* =====================================================
 Responsif: ponsel kecil
 ===================================================== */
+.customer-list-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+}
+
+.customer-list-pagination > span {
+    color: var(--muted);
+    font-size: .7rem;
+}
+
+.customer-list-pagination > div {
+    display: flex;
+    gap: .4rem;
+}
+
 @media (max-width: 575.98px) {
     html {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .form-control, .form-select {
         min-height: 40px;
         padding: .45rem .65rem;
-        font-size: 16px;
+        font-size: 17px;
         line-height: 1.35;
     }
 
@@ -1332,7 +1553,7 @@ Responsif: ponsel kecil
     }
 
     input[type="date"].form-control {
-        font-size: 16px;
+        font-size: 17px;
     }
 
     /* Metadata upload dibuat seukuran kontrol ponsel lain. */
@@ -1343,12 +1564,12 @@ Responsif: ponsel kecil
         min-height: 40px;
         height: 40px;
         padding: .45rem .65rem;
-        font-size: 12px;
+        font-size: 14px;
         line-height: 1.25;
     }
 
     #uploadForm #uploadPeriode::placeholder {
-        font-size: 12px;
+        font-size: 11px;
         line-height: 1.25;
     }
 
@@ -1358,8 +1579,8 @@ Responsif: ponsel kecil
     #uploadForm #uploadTanggal::-webkit-datetime-edit-day-field,
     #uploadForm #uploadTanggal::-webkit-datetime-edit-month-field,
     #uploadForm #uploadTanggal::-webkit-datetime-edit-year-field {
-        font-size: 12px;
-        line-height: 1.25;
+        font-size: 11px;
+        line-height: 1.2;
     }
 
     #uploadForm #uploadTanggal::-webkit-calendar-picker-indicator {
@@ -1368,19 +1589,12 @@ Responsif: ponsel kecil
         padding: 2px;
     }
 
-    .file-picker {
-        height: 40px;
+    .btn.auto-upload-button {
+        min-width: 165px;
+        min-height: 36px;
+        padding: .38rem .7rem;
         border-radius: 10px;
-    }
-
-    .file-picker-button {
-        padding: 0 .7rem;
-        font-size: 12px;
-    }
-
-    .file-picker-name {
-        padding: 0 .65rem;
-        font-size: 12px;
+        font-size: 11px;
     }
 
     .btn {
@@ -1391,17 +1605,17 @@ Responsif: ponsel kecil
 
     .input-group-text {
         padding: .42rem .55rem;
-        font-size: .72rem;
+        font-size: .62rem;
     }
 
     .form-label {
         margin-bottom: .3rem;
-        font-size: .7rem;
+        font-size: .89rem;
     }
 
     .form-text {
         margin-top: .25rem;
-        font-size: .62rem;
+        font-size: .75rem;
     }
 
     body {
@@ -1424,7 +1638,7 @@ Responsif: ponsel kecil
     }
 
     .app-navbar .btn {
-        font-size: .72rem;
+        font-size: .8rem;
     }
 
     .stat-strip {
@@ -1476,12 +1690,12 @@ Responsif: ponsel kecil
 
     .download-actions .btn {
         grid-column: auto !important;
-        width: 100%;
+        width: 80%;
     }
 
     .file-entry-actions {
         grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: .15rem;
+        gap: .13rem;
     }
 
     #documentDateAccordion .file-entry-actions {
@@ -1547,7 +1761,7 @@ Responsif: ponsel kecil
 
     .alert {
         padding: .75rem;
-        font-size: .8rem;
+        font-size: 1rem;
     }
 
     .table-responsive .table {
@@ -1592,10 +1806,18 @@ Halaman manajemen akun
 .management-section-heading p {
     margin: 0;
     color: var(--muted);
-    font-size: .78rem;
+    font-size: 1rem;
+}
+
+.company-logo-field {
+    display: grid;
+    flex: 0 0 150px;
+    width: 150px;
+    gap: .3rem;
 }
 
 .company-logo-preview {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1607,6 +1829,31 @@ Halaman manajemen akun
     background: #fff;
     border: 1px solid var(--line);
     border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.company-logo-field .company-logo-preview {
+    width: 100%;
+}
+
+.company-logo-help {
+    color: var(--muted);
+    font-size: .58rem;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.company-logo-help.is-error {
+    color: #c92a2a;
+    font-weight: 600;
+}
+
+.company-logo-preview:hover,
+.company-logo-preview:focus-visible {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 .2rem rgba(91, 91, 214, .1);
+    outline: 0;
 }
 
 .company-logo-preview img {
@@ -1618,7 +1865,7 @@ Halaman manajemen akun
 
 .company-logo-preview.is-empty {
     flex-direction: column;
-    gap: .2rem;
+    gap: .3rem;
     color: var(--muted);
     background: #f8fafc;
     font-size: .65rem;
@@ -1626,6 +1873,28 @@ Halaman manajemen akun
 
 .company-logo-preview.is-empty i {
     font-size: 1.15rem;
+}
+
+.company-logo-action {
+    position: absolute;
+    right: .35rem;
+    bottom: .35rem;
+    padding: .2rem .4rem;
+    color: #fff;
+    background: rgba(31, 41, 85, .86);
+    border-radius: 6px;
+    font-size: .56rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.company-logo-preview.is-empty .company-logo-action {
+    position: static;
+    padding: 0;
+    color: var(--primary);
+    background: transparent;
+    font-size: .65rem;
 }
 
 .company-settings-form {
@@ -1669,6 +1938,26 @@ Halaman manajemen akun
 
 .account-page .panel {
     overflow: hidden;
+}
+
+/* Tipografi form manajemen dibuat konsisten pada desktop. */
+.account-page .form-control,
+.account-page .form-select {
+    min-height: 40px;
+    padding: .48rem .7rem;
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.account-page .form-control::placeholder {
+    font-size: 1rem;
+    line-height: 1.35;
+}
+
+.account-page textarea.form-control {
+    height: auto;
+    min-height: 72px;
+    line-height: 1.45;
 }
 
 .account-page .billing-box {
@@ -1733,6 +2022,7 @@ Halaman manajemen akun
 }
 
 .account-entry-meta strong {
+    font-size: 1rem;
     color: #475467;
     font-weight: 600;
 }
@@ -1774,6 +2064,28 @@ Halaman manajemen akun
         padding: 1rem !important;
     }
 
+    .account-page .form-control,
+    .account-page .form-select {
+        min-height: 36px;
+        height: 36px;
+        padding: .4rem .6rem;
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    .account-page .form-control::placeholder {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    .account-page textarea.form-control {
+        height: auto;
+        min-height: 64px;
+        padding: .5rem .6rem;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
     .management-section-heading {
         align-items: center;
     }
@@ -1782,6 +2094,11 @@ Halaman manajemen akun
         flex-basis: 105px;
         width: 105px;
         height: 58px;
+    }
+
+    .company-logo-field {
+        flex-basis: 105px;
+        width: 105px;
     }
 
     .company-settings-actions .btn {
@@ -1795,7 +2112,7 @@ Halaman manajemen akun
 
     .account-page .billing-box label {
         min-height: 38px;
-        font-size: .85rem;
+        font-size: .75rem;
     }
 
     .account-page .account-submit {
@@ -1933,7 +2250,7 @@ Halaman login
     display: block;
     margin-bottom: .75rem;
     color: #d9c28f;
-    font-size: .68rem;
+    font-size: .78rem;
     font-weight: 700;
     letter-spacing: .14em;
     text-transform: uppercase;
@@ -2200,7 +2517,7 @@ Modal pelanggan pada layar ponsel
 
     #customerModal .modal-header p,
     #listCustomerModal .modal-header p {
-        font-size: .61rem;
+        font-size: .8rem;
         line-height: 1.4;
     }
 
@@ -2212,8 +2529,31 @@ Modal pelanggan pada layar ponsel
         --bs-gutter-y: .65rem;
     }
 
+    /* Teks input pelanggan dibuat proporsional dengan modal ponsel. */
+    #customerModal .form-control,
+    #customerModal .form-select {
+        min-height: 36px;
+        height: 36px;
+        padding: .4rem .6rem;
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    #customerModal .form-control::placeholder {
+        font-size: 12px;
+        line-height: 1.3;
+    }
+
+    #customerModal .form-select option {
+        font-size: 12px;
+    }
+
     #customerModal textarea.form-control {
+        height: auto;
         min-height: 68px;
+        padding: .5rem .6rem;
+        font-size: 12px;
+        line-height: 1.4;
         resize: vertical;
     }
 
@@ -2271,14 +2611,15 @@ Modal pelanggan pada layar ponsel
     #customerModal .paket-harga-label {
         min-height: 0;
         margin: 0;
-        font-size: .66rem;
+        font-size: .75rem;
         line-height: 1.35;
     }
 
     #customerModal .paket-harga-box .harga-input {
         min-height: 34px;
+        height: 34px;
         padding: .35rem .5rem;
-        font-size: 14px;
+        font-size: 12px;
     }
 
     #customerModal .modal-footer {
@@ -2286,6 +2627,10 @@ Modal pelanggan pada layar ponsel
         grid-template-columns: 1fr 1fr;
         gap: .5rem;
         padding: .7rem .75rem;
+    }
+
+    #customerModal.is-editing .modal-footer {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     #customerModal .modal-footer .btn {
@@ -2296,8 +2641,46 @@ Modal pelanggan pada layar ponsel
         font-size: .7rem;
     }
 
+    #customerModal #deleteCustomerBtn {
+        margin: 0;
+    }
+
     #listCustomerModal .modal-body {
         padding: .55rem;
+    }
+
+    .package-create-form {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: .4rem;
+    }
+
+    .package-create-form > .form-control,
+    .package-create-form > .btn {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 9px !important;
+    }
+
+    .package-management-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: .45rem;
+        padding: .5rem;
+    }
+
+    .package-management-actions {
+        gap: .25rem;
+    }
+
+    .package-management-actions .btn {
+        min-height: 30px;
+        padding: .3rem .4rem;
+        font-size: .6rem;
+    }
+
+    .package-management-actions .btn span {
+        display: none;
     }
 
     #listCustomerModal .table-responsive {
@@ -2330,12 +2713,2057 @@ Modal pelanggan pada layar ponsel
         background: #fafaff;
     }
 
-    #listCustomerModal .customer-edit-button {
+    #listCustomerModal .customer-edit-button,
+    #listCustomerModal .customer-delete-button {
         width: auto;
         min-width: 0;
         min-height: 30px;
         padding: .3rem .45rem;
         border-radius: 8px;
         font-size: .64rem;
+    }
+
+    #listCustomerModal .customer-row-actions .btn span {
+        display: none;
+    }
+}
+/* Menjaga input dan isi modal tetap terlihat ketika keyboard ponsel terbuka. */
+@media (max-width: 767.98px) {
+    input:not([type="hidden"]),
+    textarea,
+    select,
+    [contenteditable="true"] {
+        scroll-margin-top: 76px;
+        scroll-margin-bottom: 28px;
+    }
+
+    body.mobile-keyboard-open .modal.show {
+        top: var(--mobile-viewport-top, 0);
+        height: var(--mobile-visible-height, 100dvh);
+        overflow: hidden;
+    }
+
+    body.mobile-keyboard-open .modal.show .modal-dialog {
+        min-height: 0;
+        max-height: calc(var(--mobile-visible-height, 100dvh) - 1rem);
+        margin-top: .5rem;
+        margin-bottom: .5rem;
+    }
+
+    body.mobile-keyboard-open .modal.show .modal-content {
+        max-height: calc(var(--mobile-visible-height, 100dvh) - 1rem);
+        overflow: hidden;
+    }
+
+    body.mobile-keyboard-open .modal.show .modal-body {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* =========================================================
+Halaman direktori pelanggan
+========================================================= */
+.mini-stat-action {
+    text-decoration: none;
+}
+
+.customers-page-container {
+    max-width: 1440px;
+}
+
+.customers-heading {
+    align-items: flex-end;
+}
+
+.customers-add-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    min-height: 42px;
+    border-radius: 11px;
+    padding: .62rem 1rem;
+    font-size: .82rem;
+    font-weight: 700;
+}
+
+.customers-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.customers-search {
+    display: flex;
+    align-items: center;
+    width: min(100%, 520px);
+    min-height: 44px;
+    padding: 0 .85rem;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+    color: var(--muted);
+}
+
+.customers-search:focus-within {
+    border-color: rgba(79, 70, 229, .5);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .1);
+}
+
+.customers-search input {
+    flex: 1;
+    min-width: 0;
+    height: 42px;
+    padding: 0 .7rem;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: .82rem;
+}
+
+.customers-search input::placeholder {
+    color: #98a2b3;
+    font-size: .78rem;
+}
+
+.customers-search-clear,
+.customer-menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+}
+
+.customers-search-clear {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.customers-result-count {
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+.customer-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1rem;
+}
+
+/* Accordion kategori billing dan rincian pelanggan. */
+.customer-billing-list {
+    display: grid;
+    gap: .75rem;
+}
+
+.customer-billing-group {
+    overflow: visible;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 9px 28px rgba(15, 23, 42, .05);
+}
+
+.customer-billing-heading {
+    margin: 0;
+}
+
+.customer-billing-toggle {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) auto 18px;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    padding: .85rem 1rem;
+    border: 0;
+    border-radius: 15px;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+}
+
+.customer-billing-toggle:not(.collapsed) {
+    border-radius: 15px 15px 0 0;
+    background: #f8f9ff;
+}
+
+.customer-billing-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #e9edff;
+    color: var(--primary);
+    font-size: .9rem;
+}
+
+.customer-billing-name {
+    min-width: 0;
+}
+
+.customer-billing-name strong,
+.customer-billing-name small {
+    display: block;
+}
+
+.customer-billing-name strong {
+    overflow: hidden;
+    font-size: .82rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.customer-billing-name small {
+    margin-top: .15rem;
+    color: var(--muted);
+    font-size: .62rem;
+}
+
+.customer-billing-count {
+    padding: .3rem .55rem;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: .62rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.customer-billing-chevron,
+.customer-detail-chevron {
+    color: var(--muted);
+    transition: transform .2s ease;
+}
+
+.customer-billing-toggle:not(.collapsed) .customer-billing-chevron,
+.customer-accordion-toggle:not(.collapsed) .customer-detail-chevron {
+    transform: rotate(180deg);
+}
+
+.customer-billing-body {
+    padding: .75rem;
+    border-top: 1px solid #edf0f5;
+}
+
+.customer-category-loading,
+.customer-category-placeholder,
+.customer-category-error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .55rem;
+    min-height: 84px;
+    padding: 1rem;
+    border-radius: 11px;
+    background: #f8f9fc;
+    color: var(--muted);
+    font-size: .7rem;
+    text-align: center;
+}
+
+.customer-category-error {
+    background: #fff1f2;
+    color: #b42318;
+}
+
+.customer-accordion-item {
+    overflow: visible;
+    border: 1px solid #e8ebf1;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.customer-accordion-item + .customer-accordion-item {
+    margin-top: .55rem;
+}
+
+.customer-accordion-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 34px;
+    align-items: center;
+    gap: .35rem;
+    padding: .35rem .4rem .35rem .55rem;
+}
+
+.customer-accordion-toggle {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto 16px;
+    align-items: center;
+    gap: .65rem;
+    min-width: 0;
+    padding: .35rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+}
+
+.customer-accordion-toggle .customer-card-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    font-size: .8rem;
+}
+
+.customer-accordion-toggle .customer-card-identity {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .3rem .5rem;
+}
+
+.customer-accordion-toggle .customer-card-identity strong {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: .75rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.customer-detail-collapse {
+    border-top: 1px solid #edf0f5;
+}
+
+.customer-detail-body {
+    padding: 0 .8rem .8rem;
+}
+
+.customer-category-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin-top: .65rem;
+    padding-top: .65rem;
+    border-top: 1px solid #edf0f5;
+}
+
+.customer-category-pagination > span {
+    color: var(--muted);
+    font-size: .64rem;
+    font-weight: 600;
+}
+
+.customer-category-pagination > div {
+    display: flex;
+    gap: .4rem;
+}
+
+.customer-category-pagination .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 30px;
+    padding: 0;
+    font-size: .62rem;
+}
+
+@media (max-width: 767.98px) {
+    .customer-billing-toggle {
+        grid-template-columns: 36px minmax(0, 1fr) auto 14px;
+        gap: .55rem;
+        padding: .65rem .7rem;
+    }
+
+    .customer-billing-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        font-size: .75rem;
+    }
+
+    .customer-billing-name strong {
+        font-size: .72rem;
+    }
+
+    .customer-billing-count {
+        padding: .25rem .42rem;
+        font-size: .55rem;
+    }
+
+    .customer-billing-body {
+        padding: .55rem;
+    }
+
+    .customer-accordion-header {
+        grid-template-columns: minmax(0, 1fr) 30px;
+        padding: .3rem .3rem .3rem .45rem;
+    }
+
+    .customer-accordion-toggle {
+        grid-template-columns: 32px minmax(0, 1fr) auto 13px;
+        gap: .45rem;
+    }
+
+    .customer-accordion-toggle .customer-card-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
+        font-size: .68rem;
+    }
+
+    .customer-accordion-toggle .customer-card-identity strong {
+        font-size: .67rem;
+    }
+
+    .customer-accordion-toggle .customer-prefix,
+    .customer-accordion-toggle .customer-account-status {
+        font-size: .52rem;
+    }
+
+    .customer-detail-body {
+        padding: 0 .6rem .6rem;
+    }
+}
+
+.customer-directory-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: 17px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .055);
+}
+
+.customer-card-header {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 34px;
+    align-items: center;
+    gap: .75rem;
+}
+
+.customer-card-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #eef2ff, #e0e7ff);
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.customer-card-identity {
+    min-width: 0;
+}
+
+.customer-card-identity h2 {
+    margin: 0 0 .35rem;
+    overflow: hidden;
+    color: var(--ink);
+    font-size: .92rem;
+    font-weight: 700;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.customer-card-identity > div {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .35rem .55rem;
+}
+
+.customer-prefix {
+    padding: .18rem .45rem;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4338ca;
+    font-size: .65rem;
+    font-weight: 700;
+}
+
+.customer-billing {
+    display: inline-flex;
+    align-items: center;
+    gap: .28rem;
+    color: var(--muted);
+    font-size: .68rem;
+}
+
+.customer-menu-button {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    font-size: 1rem;
+}
+
+.customer-menu-button:hover,
+.customer-menu-button[aria-expanded="true"] {
+    background: #f1f3f9;
+    color: var(--ink);
+}
+
+.customer-card-menu .dropdown-menu {
+    min-width: 180px;
+    padding: .4rem;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+}
+
+.customer-card-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .55rem .65rem;
+    border-radius: 8px;
+    font-size: .72rem;
+}
+
+.customer-card-menu .dropdown-item i {
+    width: 15px;
+    text-align: center;
+}
+
+.customer-contact-grid {
+    display: grid;
+    grid-template-columns: .8fr 1.5fr .7fr;
+    gap: .7rem;
+    margin: .95rem 0;
+    padding: .8rem 0;
+    border-top: 1px solid #edf0f5;
+    border-bottom: 1px solid #edf0f5;
+}
+
+.customer-contact-grid div,
+.customer-account-grid div {
+    min-width: 0;
+}
+
+.customer-contact-grid span,
+.customer-account-grid span {
+    display: block;
+    margin-bottom: .2rem;
+    color: var(--muted);
+    font-size: .62rem;
+}
+
+.customer-contact-grid strong,
+.customer-account-grid strong {
+    display: block;
+    overflow: hidden;
+    color: var(--ink);
+    font-size: .69rem;
+    font-weight: 600;
+    line-height: 1.45;
+    text-overflow: ellipsis;
+}
+
+.customer-contact-grid strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.customer-account-detail {
+    padding: .8rem;
+    border-radius: 12px;
+    background: #f8f9fc;
+}
+
+.customer-account-detail.is-missing {
+    background: #fff8ed;
+}
+
+.customer-account-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .6rem;
+    margin-bottom: .65rem;
+}
+
+.customer-account-title > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    color: var(--ink);
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+.customer-account-title > span:first-child i {
+    color: var(--primary);
+    font-size: .85rem;
+}
+
+.customer-account-status {
+    padding: .2rem .45rem;
+    border-radius: 999px;
+    font-size: .58rem;
+    font-weight: 700;
+}
+
+.customer-account-status.is-active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.customer-account-status.is-inactive {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.customer-account-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .65rem;
+}
+
+.customer-loading-card,
+.customer-page-empty {
+    grid-column: 1 / -1;
+    border: 1px dashed var(--line);
+    border-radius: 17px;
+    background: rgba(255, 255, 255, .7);
+    color: var(--muted);
+    text-align: center;
+}
+
+.customer-loading-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    min-height: 150px;
+    font-size: .78rem;
+}
+
+.customer-page-empty {
+    padding: 3rem 1rem;
+}
+
+.customer-page-empty > span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: .8rem;
+    border-radius: 15px;
+    background: #eef2ff;
+    color: var(--primary);
+}
+
+.customer-page-empty h2 {
+    margin-bottom: .3rem;
+    color: var(--ink);
+    font-size: .92rem;
+}
+
+.customer-page-empty p {
+    margin: 0;
+    font-size: .72rem;
+}
+
+.customer-page-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: .8rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: #fff;
+}
+
+.customer-page-pagination > span {
+    color: var(--muted);
+    font-size: .7rem;
+    font-weight: 600;
+}
+
+.customer-page-pagination > div {
+    display: flex;
+    gap: .5rem;
+}
+
+.customer-page-pagination .btn {
+    min-height: 34px;
+    padding: .4rem .65rem;
+    font-size: .68rem;
+}
+
+@media (max-width: 767.98px) {
+    .customers-heading {
+        align-items: stretch;
+    }
+
+    .customers-add-button {
+        align-self: flex-start;
+        min-height: 38px;
+        padding: .5rem .7rem;
+        font-size: .72rem;
+    }
+
+    .customers-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: .55rem;
+    }
+
+    .customers-search {
+        min-height: 40px;
+        padding: 0 .7rem;
+        border-radius: 11px;
+    }
+
+    .customers-search input {
+        height: 38px;
+        font-size: .72rem;
+    }
+
+    .customers-search input::placeholder {
+        font-size: .69rem;
+    }
+
+    .customers-result-count {
+        padding-left: .15rem;
+        font-size: .68rem;
+    }
+
+    .customer-card-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: .75rem;
+    }
+
+    .customer-directory-card {
+        padding: .8rem;
+        border-radius: 14px;
+    }
+
+    .customer-card-header {
+        grid-template-columns: 38px minmax(0, 1fr) 30px;
+        gap: .6rem;
+    }
+
+    .customer-card-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        font-size: .85rem;
+    }
+
+    .customer-card-identity h2 {
+        font-size: .79rem;
+    }
+
+    .customer-menu-button {
+        width: 30px;
+        height: 30px;
+    }
+
+    .customer-contact-grid {
+        grid-template-columns: 1fr 1.35fr;
+        gap: .6rem;
+        margin: .75rem 0;
+        padding: .7rem 0;
+    }
+
+    .customer-contact-grid > div:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .customer-account-detail {
+        padding: .7rem;
+    }
+
+    .customer-account-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .customer-account-grid > div:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .customer-page-pagination {
+        align-items: stretch;
+        flex-direction: column;
+        padding: .7rem;
+    }
+
+    .customer-page-pagination > div {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* =========================================================
+Normalisasi akhir tampilan aplikasi pada ponsel
+Aturan ini diletakkan paling akhir agar ukuran setiap komponen konsisten.
+========================================================= */
+@media (max-width: 575.98px) {
+    html {
+        font-size: 14px;
+    }
+
+    body {
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    .page-container {
+        padding-right: .65rem;
+        padding-left: .65rem;
+    }
+
+    .page-title {
+        font-size: 1.35rem;
+        line-height: 1.2;
+    }
+
+    .page-description,
+    .section-heading p,
+    .management-section-heading p,
+    .management-account-heading p {
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .section-heading h2,
+    .management-section-heading h2,
+    .management-account-heading h2 {
+        font-size: 14px;
+        line-height: 1.25;
+    }
+
+    .card,
+    .modal-content,
+    .premium-card,
+    .panel {
+        border-radius: 14px;
+    }
+
+    .card-body,
+    .modal-body,
+    .modal-footer {
+        padding: .8rem;
+    }
+
+    .form-label {
+        margin-bottom: .25rem;
+        font-size: 11px;
+        line-height: 1.25;
+    }
+
+    .form-control,
+    .form-select,
+    .account-page .form-control,
+    .account-page .form-select,
+    #customerModal .form-control,
+    #customerModal .form-select {
+        width: 100%;
+        min-height: 36px;
+        height: 36px;
+        padding: .4rem .6rem;
+        border-radius: 9px;
+        font-size: 12px;
+        line-height: 1.25;
+    }
+
+    textarea.form-control,
+    .account-page textarea.form-control,
+    #customerModal textarea.form-control {
+        height: auto;
+        min-height: 62px;
+        padding: .5rem .6rem;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .form-control::placeholder,
+    .account-page .form-control::placeholder,
+    #customerModal .form-control::placeholder {
+        font-size: 11px;
+        line-height: 1.25;
+        opacity: .72;
+    }
+
+    input[type="date"].form-control,
+    input[type="month"].form-control,
+    input[type="time"].form-control {
+        min-width: 0;
+        font-size: 12px;
+    }
+
+    input[type="date"].form-control::-webkit-datetime-edit,
+    input[type="date"].form-control::-webkit-datetime-edit-fields-wrapper,
+    input[type="date"].form-control::-webkit-datetime-edit-text,
+    input[type="date"].form-control::-webkit-datetime-edit-day-field,
+    input[type="date"].form-control::-webkit-datetime-edit-month-field,
+    input[type="date"].form-control::-webkit-datetime-edit-year-field {
+        padding: 0;
+        font-size: 12px;
+        line-height: 1.2;
+    }
+
+    input[type="date"].form-control::-webkit-calendar-picker-indicator {
+        width: 14px;
+        height: 14px;
+        margin: 0;
+        padding: 1px;
+    }
+
+    input[type="file"].form-control {
+        padding: .25rem;
+        font-size: 11px;
+    }
+
+    input[type="file"].form-control::file-selector-button {
+        min-height: 28px;
+        margin: -.05rem .45rem -.05rem -.05rem;
+        padding: .3rem .55rem;
+        border: 0;
+        border-radius: 7px;
+        font-size: 11px;
+    }
+
+    .form-select,
+    .form-select option {
+        font-size: 12px;
+    }
+
+    .form-text,
+    .invalid-feedback,
+    .valid-feedback {
+        margin-top: .2rem;
+        font-size: 10px;
+        line-height: 1.35;
+    }
+
+    .input-group-text {
+        min-height: 36px;
+        padding: .35rem .5rem;
+        font-size: 11px;
+    }
+
+    .form-check-input {
+        width: 1rem;
+        height: 1rem;
+        min-height: 0;
+    }
+
+    .btn,
+    .account-page .modal-footer .btn,
+    #customerModal .modal-footer .btn {
+        min-height: 34px;
+        padding: .38rem .65rem;
+        border-radius: 9px;
+        font-size: 11px;
+        line-height: 1.2;
+    }
+
+    .btn.auto-upload-button {
+        min-width: 158px;
+        min-height: 34px;
+        padding: .38rem .7rem;
+        font-size: 11px;
+    }
+
+    #uploadForm #uploadPeriode,
+    #uploadForm #uploadTanggal {
+        min-height: 36px;
+        height: 36px;
+        padding: .4rem .6rem;
+        font-size: 12px;
+    }
+
+    #uploadForm #uploadPeriode::placeholder,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-fields-wrapper,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-text,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-day-field,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-month-field,
+    #uploadForm #uploadTanggal::-webkit-datetime-edit-year-field {
+        font-size: 11px;
+    }
+
+    .tab-search {
+        margin: .6rem;
+    }
+
+    .tab-search .form-control {
+        min-height: 36px;
+        height: 36px;
+        font-size: 12px;
+    }
+
+    .tab-search .form-control::placeholder {
+        font-size: 11px;
+    }
+
+    .btn-group {
+        width: auto;
+        height: auto;
+        flex-direction: row;
+    }
+
+    .mini-stat {
+        min-height: 48px;
+        padding: .4rem .48rem;
+        border-radius: 10px;
+    }
+
+    .mini-stat span,
+    .mini-stat strong,
+    .mini-stat-action strong {
+        font-size: 10px;
+    }
+
+    .section-icon,
+    .file-entry-icon {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        border-radius: 10px;
+        font-size: 13px;
+    }
+
+    .file-card-list,
+    .date-accordion {
+        padding: .5rem;
+    }
+
+    .file-entry {
+        padding: .6rem;
+        gap: .5rem;
+        border-radius: 10px;
+    }
+
+    .file-entry-main {
+        gap: .55rem;
+    }
+
+    .file-entry-info h3 {
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+    .file-entry-subtitle,
+    .file-entry-meta {
+        font-size: 9px;
+        line-height: 1.35;
+    }
+
+    .file-entry-actions .btn,
+    .date-accordion .file-entry-actions .btn {
+        width: 100%;
+        min-height: 30px;
+        padding: .28rem .18rem;
+        font-size: 9px;
+    }
+
+    .download-actions .btn,
+    .date-pagination {
+        width: 100%;
+    }
+
+    .accordion-button {
+        padding: .65rem;
+        font-size: 10px;
+    }
+
+    .accordion-button .badge,
+    .account-section-count {
+        font-size: 9px;
+    }
+
+    .table {
+        font-size: 10px;
+    }
+
+    .table > :not(caption) > * > * {
+        padding: .5rem .45rem;
+    }
+
+    .alert,
+    .toast {
+        padding: .65rem;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    .modal-title {
+        font-size: 14px;
+    }
+
+    .modal-header {
+        padding: .75rem .8rem;
+    }
+
+    .modal-footer {
+        gap: .4rem;
+    }
+
+    .page-link {
+        min-width: 30px;
+        min-height: 30px;
+        padding: .3rem .45rem;
+        font-size: 10px;
+    }
+
+    .company-logo-preview {
+        flex-basis: 96px;
+        width: 96px;
+        height: 52px;
+        border-radius: 9px;
+    }
+
+    .company-logo-field {
+        flex-basis: 96px;
+        width: 96px;
+    }
+
+    .company-logo-help {
+        font-size: 8px;
+    }
+
+    .company-logo-action,
+    .company-logo-preview.is-empty .company-logo-action {
+        font-size: 8px;
+    }
+}
+/* Loading global untuk navigasi, form, dan komunikasi dengan server. */
+.app-loading-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    visibility: hidden;
+    opacity: 0;
+    background: rgba(12, 20, 38, .3);
+    backdrop-filter: blur(2px);
+    transition: opacity .15s ease, visibility .15s ease;
+    pointer-events: none;
+}
+
+.app-loading-overlay.is-visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.app-loading-card {
+    display: inline-flex;
+    align-items: center;
+    gap: .65rem;
+    min-width: 132px;
+    padding: .75rem 1rem;
+    color: var(--navy);
+    background: rgba(255, 255, 255, .96);
+    border: 1px solid rgba(255, 255, 255, .85);
+    border-radius: 13px;
+    box-shadow: 0 18px 48px rgba(15, 23, 42, .2);
+    font-size: .76rem;
+    font-weight: 600;
+}
+
+.app-loading-spinner {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    border: 2px solid rgba(91, 91, 214, .2);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: app-loading-spin .7s linear infinite;
+}
+
+.btn.is-interacting,
+button.is-interacting {
+    transform: scale(.97);
+}
+
+@keyframes app-loading-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 575.98px) {
+    .app-loading-card {
+        min-width: 116px;
+        padding: .6rem .75rem;
+        border-radius: 11px;
+        font-size: 11px;
+    }
+
+    .app-loading-spinner {
+        width: 17px;
+        height: 17px;
+        flex-basis: 17px;
+    }
+
+    .customer-list-pagination {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .customer-list-pagination > span {
+        font-size: 10px;
+        text-align: center;
+    }
+
+    .customer-list-pagination > div {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ================================================================
+   KONTRAK UKURAN RESPONSIF FINAL
+   Bagian ini menjadi acuan terakhir agar aturan lama tidak saling
+   menimpa. Desktop memakai skala website, ponsel memakai skala app.
+   ================================================================ */
+:root {
+    --ui-control-height: 42px;
+    --ui-button-height: 40px;
+    --ui-card-radius: 16px;
+    --ui-control-radius: 10px;
+    --ui-page-gap: 16px;
+}
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+img,
+svg,
+.page-container,
+.card,
+.panel,
+.premium-card,
+.modal-content,
+.table-responsive,
+.file-entry,
+.customer-billing-group,
+.customer-accordion-item {
+    max-width: 100%;
+}
+
+.page-container,
+.card-body,
+.file-entry-main,
+.file-entry-info,
+.report-action-toolbar > *,
+.customer-card-identity {
+    min-width: 0;
+}
+
+.app-shell {
+    width: 100%;
+    max-width: 1400px;
+}
+
+.page-container {
+    padding-right: clamp(16px, 2vw, 28px);
+    padding-left: clamp(16px, 2vw, 28px);
+}
+
+.page-title {
+    font-size: clamp(24px, 2vw, 32px);
+    line-height: 1.2;
+}
+
+.page-description {
+    max-width: 720px;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.card,
+.panel,
+.premium-card {
+    border-radius: var(--ui-card-radius);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.section-heading {
+    gap: 12px;
+}
+
+.section-icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+    font-size: 15px;
+}
+
+.section-heading h2,
+.section-heading h3 {
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+.section-heading p {
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.form-label {
+    margin-bottom: 6px;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.form-control,
+.form-select,
+.account-page .form-control,
+.account-page .form-select {
+    width: 100%;
+    min-height: var(--ui-control-height);
+    height: auto;
+    padding: 9px 12px;
+    border-radius: var(--ui-control-radius);
+    font-size: 14px;
+    line-height: 1.35;
+}
+
+.form-control::placeholder,
+.account-page .form-control::placeholder {
+    font-size: 13px;
+}
+
+textarea.form-control,
+.account-page textarea.form-control {
+    min-height: 84px;
+    resize: vertical;
+}
+
+input[type="date"].form-control,
+input[type="month"].form-control {
+    font-size: 14px;
+}
+
+.input-group-text {
+    padding: 9px 12px;
+    font-size: 13px;
+}
+
+.btn,
+.account-page .btn {
+    min-height: var(--ui-button-height);
+    padding: 8px 13px;
+    border-radius: var(--ui-control-radius);
+    font-size: 13px;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.btn,
+.btn-group,
+.file-entry-actions,
+.customer-row-actions {
+    flex-direction: row;
+}
+
+.btn i,
+.dropdown-item i {
+    font-size: 13px;
+}
+
+.btn-sm {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 11px;
+}
+
+.dropdown-menu {
+    max-width: calc(100vw - 16px);
+    border-radius: 11px;
+    font-size: 12px;
+}
+
+.dropdown-item {
+    min-height: 34px;
+    padding: 8px 12px;
+}
+
+.mini-stat {
+    min-width: 0;
+    min-height: 66px;
+    padding: 12px 14px;
+}
+
+.mini-stat > span {
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.mini-stat strong {
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.mini-stat i {
+    font-size: 13px;
+}
+
+.latest-data-heading {
+    min-height: 46px;
+    padding: 10px 14px;
+}
+
+/* Menetralkan margin negatif Bootstrap .row pada area aksi data terbaru. */
+.latest-data-actions {
+    --bs-gutter-x: 0;
+    width: 100%;
+    margin: 0;
+    padding: 12px 14px 14px;
+    border-right: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    background: #fff;
+}
+
+.latest-data-actions > .report-action-toolbar {
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.latest-data-card > .data-panel {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.latest-data-heading > div i,
+.latest-data-title h4 {
+    font-size: 13px;
+}
+
+.report-action-toolbar {
+    grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(96px, 1fr));
+    gap: 8px;
+}
+
+.report-action-toolbar > .btn,
+.report-billing-menu > .btn {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    font-size: 12px;
+}
+
+.report-card,
+.premium-card:has(.report-action-toolbar),
+.latest-data-heading {
+    overflow: visible;
+}
+
+.file-entry {
+    gap: 14px;
+    padding: 14px;
+}
+
+.file-entry-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    font-size: 14px;
+}
+
+.file-entry-info h3 {
+    font-size: 13px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.file-entry-meta,
+.file-entry-subtitle {
+    font-size: 11px;
+}
+
+.file-entry-actions .btn {
+    width: auto;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #aeb5d8 #eef0f7;
+}
+
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #eef0f7;
+    border-radius: 999px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #aeb5d8;
+    border-radius: 999px;
+}
+
+.table {
+    font-size: 12px;
+}
+
+.table > :not(caption) > * > * {
+    padding: 10px 12px;
+}
+
+.modal-dialog {
+    max-width: min(720px, calc(100vw - 32px));
+}
+
+.modal-content {
+    border-radius: 16px;
+}
+
+.modal-header,
+.modal-footer {
+    padding: 14px 16px;
+}
+
+.modal-body {
+    padding: 16px;
+}
+
+.modal-title {
+    font-size: 16px;
+}
+
+.page-link {
+    min-width: 34px;
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 11px;
+}
+
+/* Tampilan menengah: ruang tetap lega tanpa memakai ukuran desktop penuh. */
+@media (min-width: 576px) and (max-width: 991.98px) {
+    .page-heading {
+        gap: 14px;
+    }
+
+    .stat-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%;
+    }
+
+    .report-action-toolbar {
+        grid-template-columns: minmax(160px, 1.35fr) repeat(3, minmax(88px, 1fr));
+    }
+}
+
+/* Skala aplikasi ponsel. Semua target sentuh tetap proporsional dan sebaris. */
+@media (max-width: 575.98px) {
+    :root {
+        --ui-control-height: 38px;
+        --ui-button-height: 36px;
+        --ui-card-radius: 14px;
+        --ui-control-radius: 9px;
+        --ui-page-gap: 10px;
+    }
+
+    html {
+        font-size: 14px;
+    }
+
+    body {
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .page-container {
+        padding-right: 7px;
+        padding-left: 7px;
+        padding-bottom: 24px !important;
+    }
+
+    .app-navbar {
+        margin-bottom: 10px;
+    }
+
+    .app-navbar .container-fluid {
+        min-height: 54px;
+        padding: 7px 10px;
+    }
+
+    .brand-wrap {
+        gap: 8px;
+    }
+
+    .brand-mark {
+        width: 34px;
+        height: 34px;
+        flex: 0 0 34px;
+        border-radius: 10px;
+        font-size: 13px;
+    }
+
+    .brand-text strong {
+        font-size: 12px;
+    }
+
+    .brand-text small {
+        font-size: 8px;
+    }
+
+    .navbar-toggler {
+        width: 34px;
+        height: 34px;
+        padding: 6px;
+    }
+
+    .navbar-actions {
+        align-items: stretch;
+        gap: 6px;
+        padding-top: 8px;
+    }
+
+    .navbar-actions .btn {
+        min-height: 36px;
+        font-size: 11px;
+    }
+
+    .page-heading {
+        gap: 9px;
+        margin-bottom: 10px;
+    }
+
+    .page-eyebrow {
+        margin-bottom: 3px;
+        font-size: 9px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        line-height: 1.2;
+    }
+
+    .page-description {
+        margin-top: 5px;
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .stat-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        width: 100%;
+    }
+
+    .mini-stat {
+        min-height: 49px;
+        padding: 7px 9px;
+        border-radius: 11px;
+    }
+
+    .mini-stat > span {
+        font-size: 9px;
+    }
+
+    .mini-stat strong {
+        font-size: 11px;
+    }
+
+    .mini-stat i {
+        font-size: 11px;
+    }
+
+    .card,
+    .panel,
+    .premium-card {
+        border-radius: var(--ui-card-radius);
+    }
+
+    .card-body,
+    .card-body.p-4,
+    .account-page .card-body.p-4 {
+        padding: 12px !important;
+    }
+
+    .section-heading {
+        gap: 9px;
+    }
+
+    .section-icon {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .section-heading h2,
+    .section-heading h3 {
+        font-size: 14px;
+    }
+
+    .section-heading p {
+        font-size: 10.5px;
+        line-height: 1.4;
+    }
+
+    .form-label {
+        margin-bottom: 5px;
+        font-size: 10.5px;
+    }
+
+    .form-control,
+    .form-select,
+    .account-page .form-control,
+    .account-page .form-select {
+        min-height: var(--ui-control-height);
+        padding: 7px 10px;
+        border-radius: var(--ui-control-radius);
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .form-control::placeholder,
+    .account-page .form-control::placeholder {
+        font-size: 11.5px;
+    }
+
+    input[type="date"].form-control,
+    input[type="month"].form-control,
+    input[type="date"].form-control::-webkit-date-and-time-value {
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    textarea.form-control,
+    .account-page textarea.form-control {
+        min-height: 66px;
+    }
+
+    .input-group-text {
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    .btn,
+    .account-page .btn {
+        min-height: var(--ui-button-height);
+        padding: 7px 10px;
+        border-radius: var(--ui-control-radius);
+        font-size: 11.5px;
+        line-height: 1.15;
+        flex-direction: row;
+        gap: 5px;
+    }
+
+    .btn i,
+    .dropdown-item i {
+        font-size: 11px;
+    }
+
+    .btn-sm {
+        min-height: 32px;
+        padding: 6px 8px;
+        font-size: 10.5px;
+    }
+
+    .dropdown-menu {
+        min-width: 150px;
+        max-width: calc(100vw - 14px);
+        font-size: 11px;
+    }
+
+    .dropdown-item {
+        min-height: 32px;
+        padding: 7px 10px;
+    }
+
+    .latest-data-heading {
+        min-height: 42px;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 13px 13px 0 0;
+    }
+
+    .latest-data-actions {
+        padding: 9px 12px 12px;
+    }
+
+    .latest-data-heading > div {
+        gap: 6px;
+    }
+
+    .latest-data-heading > div i,
+    .latest-data-title h4 {
+        font-size: 11px;
+    }
+
+    .report-action-toolbar {
+        display: grid;
+        grid-template-columns: minmax(88px, 1.35fr) repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 5px;
+        width: 100%;
+    }
+
+    .report-action-toolbar > .btn,
+    .report-billing-menu > .btn {
+        width: 100%;
+        min-width: 0;
+        min-height: 36px;
+        padding: 6px 4px;
+        border-radius: 8px;
+        font-size: 9.5px;
+        gap: 3px;
+    }
+
+    .report-action-toolbar .btn i {
+        font-size: 9px;
+    }
+
+    .report-billing-menu .dropdown-menu {
+        right: auto;
+        left: 0;
+        width: min(260px, calc(100vw - 28px));
+    }
+
+    .file-entry {
+        align-items: stretch;
+        gap: 9px;
+        padding: 10px;
+        border-radius: 11px;
+    }
+
+    .file-entry-main {
+        gap: 9px;
+    }
+
+    .file-entry-icon {
+        width: 34px;
+        height: 34px;
+        flex-basis: 34px;
+        border-radius: 9px;
+        font-size: 11px;
+    }
+
+    .file-entry-info h3 {
+        font-size: 11px;
+    }
+
+    .file-entry-meta,
+    .file-entry-subtitle,
+    .account-entry-meta strong {
+        gap: 5px;
+        font-size: 9px;
+    }
+
+    .file-entry-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+        gap: 5px;
+        width: 100%;
+    }
+
+    .file-entry-actions .btn,
+    .account-entry-actions .btn {
+        width: 100%;
+        min-height: 32px;
+        font-size: 9.5px;
+    }
+
+    .table {
+        min-width: 620px;
+        font-size: 10.5px;
+    }
+
+    .table > :not(caption) > * > * {
+        padding: 8px 9px;
+    }
+
+    .modal-dialog,
+    .modal-dialog.modal-lg,
+    .customer-form-dialog {
+        width: calc(100vw - 12px);
+        max-width: calc(100vw - 12px);
+        margin: 6px auto;
+    }
+
+    .modal-content {
+        width: 100%;
+        border-radius: 13px;
+    }
+
+    .modal-header,
+    .modal-footer {
+        gap: 6px;
+        padding: 10px 11px;
+    }
+
+    .modal-body {
+        padding: 11px;
+    }
+
+    .modal-title {
+        font-size: 13px;
+    }
+
+    .modal-footer .btn {
+        flex: 1 1 auto;
+        width: auto;
+    }
+
+    .page-link {
+        min-width: 31px;
+        min-height: 31px;
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+
+    .customer-billing-heading,
+    .customer-accordion-header,
+    .customer-detail-body {
+        min-width: 0;
+    }
+
+    .customer-billing-toggle,
+    .customer-accordion-toggle {
+        gap: 7px;
+        min-width: 0;
+        padding: 10px;
+    }
+
+    .customer-billing-icon,
+    .customer-card-avatar {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        font-size: 11px;
+    }
+
+    .customer-billing-name strong,
+    .customer-card-identity strong {
+        font-size: 11px;
+    }
+
+    .customer-billing-name small,
+    .customer-prefix,
+    .customer-billing-count,
+    .customer-account-status {
+        font-size: 8.5px;
+    }
+
+    .customer-card-menu,
+    .customer-menu-button {
+        flex: 0 0 30px;
+        width: 30px;
+    }
+
+    .customer-menu-button {
+        height: 30px;
+        font-size: 11px;
+    }
+
+    .management-section-heading,
+    .management-account-heading,
+    .account-pagination,
+    .customer-category-pagination {
+        gap: 7px;
+        padding: 10px 11px;
+    }
+
+    .company-logo-preview,
+    .company-logo-field {
+        width: 96px;
+        flex-basis: 96px;
+    }
+
+    .company-logo-preview {
+        height: 52px;
+    }
+
+    /* Login staf dibuat seperti satu layar aplikasi pada ponsel. */
+    .login-shell {
+        grid-template-columns: minmax(0, 1fr);
+        width: 100%;
+        padding: 10px;
+    }
+
+    .login-card {
+        grid-template-columns: minmax(0, 1fr);
+        justify-self: center;
+        width: min(100%, 440px);
+        max-width: 100%;
+        min-height: 0;
+        border-radius: 16px;
+    }
+
+    .login-form-panel {
+        width: 100%;
+        min-width: 0;
+        padding: 20px 16px;
+    }
+
+    .login-form,
+    .login-field,
+    .login-input-wrap,
+    .login-input-wrap .form-control {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .login-mobile-brand {
+        margin-bottom: 22px;
+        font-size: 13px;
+    }
+
+    .login-brand-mark {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        font-size: 13px;
+    }
+
+    .login-title {
+        font-size: 20px;
+    }
+
+    .login-description,
+    .login-alert {
+        font-size: 11px;
+    }
+
+    .login-form {
+        gap: 12px;
+    }
+
+    .login-input-wrap .form-control,
+    .login-submit {
+        min-height: 40px;
+        font-size: 13px;
     }
 }

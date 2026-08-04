@@ -1,5 +1,6 @@
 ## Generate Invoice
- Aplikasi ini memproes data prefik voucher (Mengambil 3 awalan kode voucher)
+Sebelum memulai lakukan composer install di dalam folder proyek
+ Aplikasi ini memproes data prefik voucher (Mengambil 3 prefix kode voucher)
 
 ## Data yang di proses upload
 
@@ -46,10 +47,14 @@ Proses upload:
 Data disimpan ke:
 
 - `uploaded_files` untuk informasi file upload.
-- `rincian` untuk kode, prefix, paket, dan biaya setiap voucher.
-- `rekap` untuk jumlah voucher per prefix dan paket.
+- File asli di `files/uploads` untuk rincian lengkap setiap voucher.
+- `rekap` untuk jumlah voucher dan total biaya per prefix dan paket.
 - `invoices` untuk total tagihan pelanggan.
 - `paket_master` untuk daftar paket.
+
+Kode voucher satu per satu tidak disimpan lagi ke database. Database hanya menyimpan
+rekap ringkas yang diperlukan untuk halaman customer dan pembuatan invoice, sehingga
+data lama tidak membebani database. Rincian lengkap tetap tersedia pada file upload asli.
 
 Catatan:
 
@@ -125,7 +130,7 @@ Ketika pelanggan ditambahkan, akun customer otomatis dibuat dan dapat dilihat pa
 Buka halaman Manajemen, kemudian isi:
 
    - Nama perusahaan.
-   - Nama kontak.
+   - Nomor customer service (CS).
    - Nomor telepon.
    - Email.
    - Website.
@@ -176,7 +181,7 @@ Catatan yang harus saya periksa:
 - Versi PHP minimal 8.2.
 - Ekstensi `gd`, `zip`, `mysqli`, `mbstring`, `fileinfo`, dan XML aktif.
 - Jalankan `composer install --no-dev --optimize-autoloader`.
-- Ubah konfigurasi database di `auth.php`.
+- Ubah konfigurasi database di `assets/php/cont/cont.php`.
 - Pastikan folder upload, generated, dan logo dapat ditulis.
 - Ubah akun admin bawaan.
 - Gunakan HTTPS.

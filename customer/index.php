@@ -4,7 +4,7 @@ require_once __DIR__.'/auth.php';
 customerRequireLogin();
 
 $db = authDb();
-$awalan = customerAuthAwalan();
+$prefix = customerAuthPrefix();
 $customer = null;
 $invoices = [];
 $invoiceTotal = 0;
@@ -22,13 +22,13 @@ unset(
     $_SESSION['customer_profile_edit_field']
 );
 
-if ($awalan !== '') {
-    $stmt = $db->prepare("SELECT c.awalan, c.nama_pelanggan, c.alamat, c.telepon, c.billing_id,
+if ($prefix !== '') {
+    $stmt = $db->prepare("SELECT c.prefix, c.nama_pelanggan, c.alamat, c.telepon, c.billing_id,
             COALESCE(b.nama, 'Belum ditentukan') AS billing_name
         FROM prefix_customers c
         LEFT JOIN billing_master b ON b.id = c.billing_id
-        WHERE c.awalan = ? LIMIT 1");
-    $stmt->bind_param('s', $awalan);
+        WHERE c.prefix = ? LIMIT 1");
+    $stmt->bind_param('s', $prefix);
     $stmt->execute();
     $customer = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -37,8 +37,8 @@ if ($awalan !== '') {
     $stmt = $db->prepare("SELECT COUNT(*) AS total_rows,
             COALESCE(SUM(i.total_harga), 0) AS total_history
         FROM invoices i
-        WHERE i.awalan = ?");
-    $stmt->bind_param('s', $awalan);
+        WHERE i.prefix = ?");
+    $stmt->bind_param('s', $prefix);
     $stmt->execute();
     $summary = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -51,32 +51,57 @@ if ($awalan !== '') {
     $stmt = $db->prepare("SELECT f.id AS file_id, i.total_harga
         FROM invoices i
         INNER JOIN uploaded_files f ON f.id = i.file_id
-        WHERE i.awalan = ?
+        WHERE i.prefix = ?
         ORDER BY f.uploaded_at DESC, f.id DESC
         LIMIT 1");
-    $stmt->bind_param('s', $awalan);
+    $stmt->bind_param('s', $prefix);
     $stmt->execute();
     $latestInvoice = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
+    // Ambil hanya 25 invoice pada halaman aktif. Rincian paket diambil setelahnya
+    // berdasarkan ID tersebut agar riwayat lama tidak ikut dikelompokkan database.
     $stmt = $db->prepare("SELECT f.id,
-            f.uploaded_at, f.periode, f.tanggal, i.total_harga,
-            COALESCE(SUM(r.jumlah), 0) AS total_voucher,
-            GROUP_CONCAT(CONCAT(r.paket, ': ', r.jumlah) ORDER BY r.paket SEPARATOR '||') AS package_summary
+            f.uploaded_at, f.periode, f.tanggal, i.total_harga
         FROM invoices i
         INNER JOIN uploaded_files f ON f.id = i.file_id
-        LEFT JOIN rekap r ON r.file_id = i.file_id AND r.awalan = i.awalan
-        WHERE i.awalan = ?
-        GROUP BY f.id, f.uploaded_at, f.periode, f.tanggal, i.total_harga
+        WHERE i.prefix = ?
         ORDER BY f.uploaded_at DESC, f.id DESC
         LIMIT ?, ?");
-    $stmt->bind_param('sii', $awalan, $invoiceOffset, $invoicePerPage);
+    $stmt->bind_param('sii', $prefix, $invoiceOffset, $invoicePerPage);
     $stmt->execute();
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
+        $row['total_voucher'] = 0;
+        $row['package_summary'] = '';
         $invoices[] = $row;
     }
     $stmt->close();
+
+    if ($invoices) {
+        $invoiceIndexes = [];
+        foreach ($invoices as $index => $invoiceRow) {
+            $invoiceIndexes[(int)$invoiceRow['id']] = $index;
+        }
+        $fileIds = implode(',', array_keys($invoiceIndexes));
+        $stmt = $db->prepare("SELECT file_id, paket, jumlah FROM rekap
+            WHERE prefix = ? AND file_id IN ({$fileIds}) ORDER BY file_id DESC, paket ASC");
+        $stmt->bind_param('s', $prefix);
+        $stmt->execute();
+        $details = $stmt->get_result();
+        $packageRows = [];
+        while ($detail = $details->fetch_assoc()) {
+            $fileId = (int)$detail['file_id'];
+            if (!isset($invoiceIndexes[$fileId])) continue;
+            $index = $invoiceIndexes[$fileId];
+            $invoices[$index]['total_voucher'] += (int)$detail['jumlah'];
+            $packageRows[$fileId][] = $detail['paket'].': '.$detail['jumlah'];
+        }
+        $stmt->close();
+        foreach ($packageRows as $fileId => $rows) {
+            $invoices[$invoiceIndexes[$fileId]]['package_summary'] = implode('||', $rows);
+        }
+    }
 }
 $db->close();
 
@@ -106,12 +131,12 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Customer Area - PLANETFlow</title>
+    <title>Customer Area - PLANNET</title>
     <link rel="stylesheet" href="../assets/vendor/poppins/poppins.css">
     <link rel="stylesheet" href="../assets/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css">
-    <link rel="stylesheet" href="../assets/css/main-style.css">
-    <link rel="stylesheet" href="assets/customer-style.css">
+    <link rel="stylesheet" href="../assets/css/main-style.css?v=<?= (int) @filemtime(__DIR__ . '/../assets/css/main-style.css') ?>">
+    <link rel="stylesheet" href="assets/customer-style.css?v=<?= (int) @filemtime(__DIR__ . '/assets/customer-style.css') ?>">
     <link rel="icon" type="image/ico" href="../assets/favicon.ico">
 </head>
 <body class="client-page customer-area-page">
@@ -123,7 +148,7 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
             <div class="eyebrow">Customer area</div>
             <h1 class="page-title">Selamat datang, <?= htmlspecialchars(customerAuthName()) ?></h1>
             <p class="page-description">
-                Berikut ringkasan layanan dan riwayat tagihan pelanggan Anda.
+                Berikut ringkasan layanan dan riwayat tagihan Anda.
             </p>
         </div>
     </section>
@@ -156,7 +181,7 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
                 <span>Profil belum lengkap: <?= htmlspecialchars(implode(' dan ', $missingProfileFields)) ?> belum diisi.</span>
                 <span class="customer-alert-actions">
                     <?php if (trim((string)$customer['telepon']) === ''): ?>
-                        <a href="#profil" class="alert-link" data-profile-edit-target="telepon">Isi telepon</a>
+                        <a href="#profil" class="alert-link" data-profile-edit-target="telepon">Isi telepon</a> dan
                     <?php endif; ?>
                     <?php if (trim((string)$customer['alamat']) === ''): ?>
                         <a href="#profil" class="alert-link" data-profile-edit-target="alamat">Isi alamat</a>
@@ -190,11 +215,11 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
             </article>
             <article class="client-summary-card">
                 <span class="client-summary-icon"><i class="fas fa-box-archive"></i></span>
-                <div><span>Jumlah periode</span><strong><?= $invoiceTotal ?></strong></div>
+                <div><span>Semua periode</span><strong><?= $invoiceTotal ?></strong></div>
             </article>
             <article class="client-summary-card">
                 <span class="client-summary-icon"><i class="fas fa-wallet"></i></span>
-                <div><span>Total riwayat</span><strong><?= customerCurrency($totalHistory) ?></strong></div>
+                <div><span>Riwayat</span><strong><?= customerCurrency($totalHistory) ?></strong></div>
             </article>
         </section>
 
@@ -203,11 +228,11 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
                 <div class="card-body p-4">
                     <div class="client-section-title customer-profile-title">
                         <span><i class="fas fa-address-card"></i></span>
-                        <div><h2>Profil pelanggan</h2><p>Informasi akun dan layanan Anda.</p></div>
+                        <div><h2>Profil</h2><p>Informasi akun dan layanan.</p></div>
                     </div>
                     <dl class="client-profile-list">
-                        <div><dt>Nama pelanggan</dt><dd><?= htmlspecialchars($customer['nama_pelanggan']) ?></dd></div>
-                        <div><dt>Awalan</dt><dd><span class="client-code"><?= htmlspecialchars($customer['awalan']) ?></span></dd></div>
+                        <div><dt>Nama</dt><dd><?= htmlspecialchars($customer['nama_pelanggan']) ?></dd></div>
+                        <div><dt>Prefix</dt><dd><span class="client-code"><?= htmlspecialchars($customer['prefix']) ?></span></dd></div>
                         <div><dt>Billing</dt><dd><?= htmlspecialchars($customer['billing_name']) ?></dd></div>
                         <div class="customer-profile-row">
                             <dt>Nomor telepon</dt>
@@ -219,7 +244,7 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
                                 <form method="post" action="actions/update_profile.php" class="customer-inline-edit d-none" data-profile-form="telepon">
                                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(customerCsrfToken()) ?>">
                                     <input type="hidden" name="field" value="telepon">
-                                    <input name="telepon" class="form-control" maxlength="20" value="<?= htmlspecialchars((string)$customer['telepon']) ?>" placeholder="Masukkan nomor telepon" required>
+                                    <input name="telepon" class="form-control" maxlength="20" value="<?= htmlspecialchars((string)$customer['telepon']) ?>" placeholder="Contoh: 081234567890 atau +6281234567890" required inputmode="tel" pattern="^(08\d{8,12}|\+62\d{8,12})$" title="Gunakan format 08... atau +62...">
                                     <div class="customer-inline-actions">
                                         <button type="button" class="btn btn-sm btn-light" data-profile-cancel="telepon">Batal</button>
                                         <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-floppy-disk"></i>Simpan</button>
@@ -357,6 +382,29 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
         form.querySelector('.form-control')?.focus();
     }
 
+    document.querySelectorAll('[data-profile-form="telepon"]').forEach(form => {
+        const phoneInput = form.querySelector('input[name="telepon"]');
+        if (!phoneInput) return;
+
+        const phonePattern = /^(08\d{8,12}|\+62\d{8,12})$/;
+        const validatePhoneInput = () => {
+            phoneInput.setCustomValidity('');
+            const value = phoneInput.value.trim();
+            if (value && !phonePattern.test(value)) {
+                phoneInput.setCustomValidity('Nomor telepon harus dimulai dengan 08 atau +62.');
+            }
+        };
+
+        phoneInput.addEventListener('input', validatePhoneInput);
+        form.addEventListener('submit', event => {
+            validatePhoneInput();
+            if (!phoneInput.checkValidity()) {
+                event.preventDefault();
+                phoneInput.reportValidity();
+            }
+        });
+    });
+
     document.querySelectorAll('[data-profile-edit], [data-profile-edit-target]').forEach(link => {
         link.addEventListener('click', event => {
             event.preventDefault();
@@ -373,5 +421,7 @@ function customerPaginationItems(int $currentPage, int $totalPages): array {
     <?php endif; ?>
 </script>
 <?php endif; ?>
+<script src="../assets/js/mobile-keyboard.js"></script>
+<script src="../assets/js/interaction-loading.js"></script>
 </body>
 </html>

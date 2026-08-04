@@ -1,6 +1,0 @@
-files/generated/
-files/uploads/
-*.xlsx
-*.pdf
-vendor/
-.vscode/

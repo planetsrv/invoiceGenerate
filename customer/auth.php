@@ -19,26 +19,25 @@ function customerAuthName(): string {
         ?: (string)($account['username'] ?? 'Pelanggan');
 }
 
-function customerAuthAwalan(): string {
-    return (string)(customerAuthAccount()['customer_awalan'] ?? '');
+function customerAuthPrefix(): string {
+    return (string)(customerAuthAccount()['customer_prefix'] ?? '');
 }
 
 function customerRequireLogin(string $loginPath = 'login.php'): void {
     $accountId = customerAuthId();
     if ($accountId > 0) {
         $db = authDb();
-        $stmt = $db->prepare("SELECT id, customer_awalan, username, full_name, is_active
+        $stmt = $db->prepare("SELECT id, customer_prefix, username, full_name, is_active
             FROM customer_accounts WHERE id = ? LIMIT 1");
         $stmt->bind_param('i', $accountId);
         $stmt->execute();
         $account = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         $db->close();
-
         if ($account && (int)$account['is_active'] === 1) {
             $_SESSION['customer_auth'] = [
                 'id' => (int)$account['id'],
-                'customer_awalan' => $account['customer_awalan'],
+                'customer_prefix' => $account['customer_prefix'],
                 'username' => $account['username'],
                 'full_name' => $account['full_name'],
             ];
@@ -46,11 +45,9 @@ function customerRequireLogin(string $loginPath = 'login.php'): void {
         }
         unset($_SESSION['customer_auth']);
     }
-
     header('Location: '.$loginPath);
     exit;
 }
-
 function customerCsrfToken(): string {
     if (empty($_SESSION['customer_csrf_token'])) {
         $_SESSION['customer_csrf_token'] = bin2hex(random_bytes(24));

@@ -3,10 +3,9 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
-if (!defined('DB_USER')) define('DB_USER', 'root');
-if (!defined('DB_PASS')) define('DB_PASS', '');
-if (!defined('DB_NAME')) define('DB_NAME', 'voucher_db');
+// Seluruh halaman memakai satu sumber konfigurasi database.
+// Jika nama database ingin diubah, cukup ubah DB_NAME pada file cont.php.
+require_once __DIR__.'/assets/php/cont/cont.php';
 
 function authDb(): mysqli {
     $db = new mysqli(DB_HOST, DB_USER, DB_PASS);
@@ -22,6 +21,11 @@ function authDb(): mysqli {
 function ensureAuthSchema(): void {
     static $done = false;
     if ($done) return;
+
+    // Buat skema utama sebelum tabel autentikasi. Hal ini membuat database baru
+    // langsung siap dipakai dari halaman mana pun, termasuk halaman Manajemen.
+    require_once __DIR__.'/assets/php/functions/main-function.php';
+    ensureDatabase();
 
     $db = authDb();
     $db->query("CREATE TABLE IF NOT EXISTS users (
@@ -42,7 +46,7 @@ function ensureAuthSchema(): void {
 
     $db->query("CREATE TABLE IF NOT EXISTS customer_accounts (
         id INT AUTO_INCREMENT PRIMARY KEY,
-        customer_awalan VARCHAR(10) NOT NULL UNIQUE,
+        customer_prefix VARCHAR(10) NOT NULL UNIQUE,
         username VARCHAR(50) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
         full_name VARCHAR(100) NOT NULL DEFAULT '',
@@ -109,7 +113,7 @@ function getCompanySettings(?mysqli $db = null): array {
 
     return array_merge([
         'company_name' => 'PLANETFlow',
-        'contact_name' => '',
+        'contact_name' => '', // Nomor customer service (CS).
         'phone' => '',
         'email' => '',
         'website' => '',
@@ -202,6 +206,45 @@ function authRequireBilling(int $billingId, ?mysqli $db = null): void {
     exit;
 }
 
+/**
+ * File upload boleh dibuka user apabila minimal satu baris rekapnya dimiliki
+ * pelanggan dari billing yang diberikan kepada user tersebut.
+ */
+function authCanAccessUpload(int $fileId, ?mysqli $db = null): bool {
+    if (authIsAdmin()) return true;
+    if ($fileId <= 0) return false;
+
+    $allowedBillingIds = authAllowedBillingIds($db);
+    if (!$allowedBillingIds) return false;
+
+    $ownsDb = $db === null;
+    $db ??= authDb();
+    $billingSql = implode(',', array_map('intval', $allowedBillingIds));
+    $stmt = $db->prepare("SELECT 1
+        FROM rekap r
+        INNER JOIN prefix_customers c ON c.prefix = r.prefix
+        WHERE r.file_id = ? AND c.billing_id IN ({$billingSql})
+        LIMIT 1");
+    $stmt->bind_param('i', $fileId);
+    $stmt->execute();
+    $allowed = (bool)$stmt->get_result()->fetch_row();
+    $stmt->close();
+    if ($ownsDb) $db->close();
+    return $allowed;
+}
+
+function authRequireUpload(int $fileId, ?mysqli $db = null): void {
+    if (authCanAccessUpload($fileId, $db)) return;
+    http_response_code(403);
+    if (authRequestWantsJson()) {
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['success' => false, 'message' => 'Anda tidak memiliki akses ke arsip tersebut.']);
+    } else {
+        echo 'Anda tidak memiliki akses ke arsip tersebut.';
+    }
+    exit;
+}
+
 function authCanAccessDocument(array $document, ?mysqli $db = null): bool {
     if (authIsAdmin()) return true;
     $billingId = (int)($document['billing_id'] ?? 0);
@@ -252,12 +295,12 @@ function loginThrottleClear(string $scope): void {
 }
 
 /** Membuat satu akun pada tabel khusus pelanggan. */
-function createCustomerAccount(mysqli $db, string $awalan, string $name): array {
-    $awalan = strtoupper(trim($awalan));
+function createCustomerAccount(mysqli $db, string $prefix, string $name): array {
+    $prefix = strtoupper(trim($prefix));
     $name = trim($name);
 
-    $stmt = $db->prepare("SELECT id, username, password FROM customer_accounts WHERE customer_awalan = ? LIMIT 1");
-    $stmt->bind_param('s', $awalan);
+    $stmt = $db->prepare("SELECT id, username, password FROM customer_accounts WHERE customer_prefix = ? LIMIT 1");
+    $stmt->bind_param('s', $prefix);
     $stmt->execute();
     $existing = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -266,7 +309,7 @@ function createCustomerAccount(mysqli $db, string $awalan, string $name): array 
     $plainName = function_exists('iconv') ? iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $name) : $name;
     if ($plainName === false) $plainName = $name;
     $namePart = preg_replace('/[^a-zA-Z0-9]+/', '', $plainName);
-    $prefixPart = preg_replace('/[^a-zA-Z0-9]+/', '', $awalan);
+    $prefixPart = preg_replace('/[^a-zA-Z0-9]+/', '', $prefix);
     $usernamePart = strtolower($prefixPart.$namePart);
     if (strlen($usernamePart) < 3) $usernamePart = strtolower($prefixPart).'client';
     $base = '@'.substr($usernamePart, 0, 49);
@@ -286,8 +329,8 @@ function createCustomerAccount(mysqli $db, string $awalan, string $name): array 
 
     $password = $name;
     $active = 1;
-    $stmt = $db->prepare("INSERT INTO customer_accounts (customer_awalan, username, password, full_name, is_active) VALUES (?,?,?,?,?)");
-    $stmt->bind_param('ssssi', $awalan, $username, $password, $name, $active);
+    $stmt = $db->prepare("INSERT INTO customer_accounts (customer_prefix, username, password, full_name, is_active) VALUES (?,?,?,?,?)");
+    $stmt->bind_param('ssssi', $prefix, $username, $password, $name, $active);
     $stmt->execute();
     $id = $stmt->insert_id;
     $stmt->close();
