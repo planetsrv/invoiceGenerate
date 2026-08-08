@@ -3521,7 +3521,7 @@ Aturan ini diletakkan paling akhir agar ukuran setiap komponen konsisten.
         line-height: 1.45;
     }
    h4,h5 {
-        font-size:.7rem !important;
+        font-size:.8rem !important;
     }
     .page-container {
         padding-right: .65rem;
@@ -4299,9 +4299,6 @@ input[type="month"].form-control {
     }
     h1,h2,h3 {
         font-size:.8rem !important;
-    }
-    h4,h5 {
-        font-size:.7rem !important;
     }
     .page-container {
         padding-right: 7px;
