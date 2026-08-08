@@ -3520,7 +3520,9 @@ Aturan ini diletakkan paling akhir agar ukuran setiap komponen konsisten.
         font-size: 12px;
         line-height: 1.45;
     }
-
+   h4,h5 {
+        font-size:.7rem !important;
+    }
     .page-container {
         padding-right: .65rem;
         padding-left: .65rem;
@@ -4262,13 +4264,11 @@ input[type="month"].form-control {
     padding: 7px 10px;
     font-size: 11px;
 }
-
 /* Tampilan menengah: ruang tetap lega tanpa memakai ukuran desktop penuh. */
 @media (min-width: 576px) and (max-width: 991.98px) {
     .page-heading {
         gap: 14px;
     }
-
     .stat-strip {
         grid-template-columns: repeat(3, minmax(0, 1fr));
         width: 100%;
@@ -4301,7 +4301,7 @@ input[type="month"].form-control {
         font-size:.8rem !important;
     }
     h4,h5 {
-        font-size:.75rem !important;
+        font-size:.7rem !important;
     }
     .page-container {
         padding-right: 7px;
