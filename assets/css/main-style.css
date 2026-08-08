@@ -1916,7 +1916,7 @@ Halaman manajemen akun
     color: #475467;
     background: #f2f4f7;
     border-radius: 999px;
-    font-size: .68rem;
+    font-size: .78rem;
     font-weight: 600;
 }
 
@@ -3520,7 +3520,7 @@ Aturan ini diletakkan paling akhir agar ukuran setiap komponen konsisten.
         font-size: 12px;
         line-height: 1.45;
     }
-   h4,h5 {
+   h4,h5,strong {
         font-size:.78rem !important;
         font-weight:600 !important;
     }
@@ -3530,7 +3530,7 @@ Aturan ini diletakkan paling akhir agar ukuran setiap komponen konsisten.
     }
 
     .page-title {
-        font-size: 1.35rem;
+        font-size: 1.4rem;
         line-height: 1.2;
     }
 
@@ -3787,7 +3787,7 @@ Aturan ini diletakkan paling akhir agar ukuran setiap komponen konsisten.
 
     .accordion-button .badge,
     .account-section-count {
-        font-size: 9px;
+        font-size: .7rem;
     }
 
     .table {
@@ -4297,9 +4297,6 @@ input[type="month"].form-control {
     body {
         font-size: 13px!important;
         line-height: 1.45;
-    }
-    h1,h2,h3 {
-        font-size:.8rem !important;
     }
     .page-container {
         padding-right: 7px;
