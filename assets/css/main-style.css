@@ -3521,7 +3521,8 @@ Aturan ini diletakkan paling akhir agar ukuran setiap komponen konsisten.
         line-height: 1.45;
     }
    h4,h5 {
-        font-size:.8rem !important;
+        font-size:.78rem !important;
+        font-weight:600 !important;
     }
     .page-container {
         padding-right: .65rem;
@@ -4034,7 +4035,7 @@ svg,
 
 .form-label {
     margin-bottom: 6px;
-    font-size: 12px;
+    font-size: .85rem;
     line-height: 1.35;
 }
 
@@ -4047,13 +4048,13 @@ svg,
     height: auto;
     padding: 9px 12px;
     border-radius: var(--ui-control-radius);
-    font-size: 14px;
+    font-size: .8rem;
     line-height: 1.35;
 }
 
 .form-control::placeholder,
 .account-page .form-control::placeholder {
-    font-size: 13px;
+    font-size: .75rem;
 }
 
 textarea.form-control,
@@ -4069,7 +4070,7 @@ input[type="month"].form-control {
 
 .input-group-text {
     padding: 9px 12px;
-    font-size: 13px;
+    font-size: .8px;
 }
 
 .btn,
@@ -4077,7 +4078,7 @@ input[type="month"].form-control {
     min-height: var(--ui-button-height);
     padding: 8px 13px;
     border-radius: var(--ui-control-radius);
-    font-size: 13px;
+    font-size: .8rem;
     line-height: 1.2;
     white-space: nowrap;
 }
@@ -4091,7 +4092,7 @@ input[type="month"].form-control {
 
 .btn i,
 .dropdown-item i {
-    font-size: 13px;
+    font-size: .8rem;
 }
 
 .btn-sm {
@@ -4103,7 +4104,7 @@ input[type="month"].form-control {
 .dropdown-menu {
     max-width: calc(100vw - 16px);
     border-radius: 11px;
-    font-size: 12px;
+    font-size: .8rem;
 }
 
 .dropdown-item {
