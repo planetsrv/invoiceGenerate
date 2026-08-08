@@ -1,6 +1,4 @@
-/* =========================================================
-Design tokens dan fondasi halaman
-========================================================= */
+
 :root {
     --ink: #111827;
     --muted: #64748b;
@@ -392,6 +390,7 @@ Form, pemilih file, dan tombol
 
 .btn:hover {
     transform: translateY(-1px);
+    color:#000;
 }
 
 .btn-primary {
@@ -4298,7 +4297,9 @@ input[type="month"].form-control {
         font-size: 13px;
         line-height: 1.45;
     }
-
+    h1,h2,h3 {
+        font-size:.8rem;
+    }
     .page-container {
         padding-right: 7px;
         padding-left: 7px;
@@ -4490,6 +4491,8 @@ input[type="month"].form-control {
         padding: 6px 8px;
         font-size: 10.5px;
     }
+
+
 
     .dropdown-menu {
         min-width: 150px;
