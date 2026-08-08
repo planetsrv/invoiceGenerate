@@ -4294,11 +4294,14 @@ input[type="month"].form-control {
     }
 
     body {
-        font-size: 13px;
+        font-size: 13px!important;
         line-height: 1.45;
     }
     h1,h2,h3 {
-        font-size:.8rem;
+        font-size:.8rem !important;
+    }
+    h4,h5 {
+        font-size:.75rem !important;
     }
     .page-container {
         padding-right: 7px;
